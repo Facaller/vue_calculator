@@ -223,3 +223,197 @@ Install and configure Vuetify globally, then use its components inside your Vue 
 (Optional) Use Vue Router and Vuex for routing and global state management if needed.
 
 Once you're comfortable with Vue, you'll find that the component-based approach is much cleaner and more scalable than working with separate HTML, CSS, and JS files.
+
+*****************8
+
+1. Components Folder
+
+Start by creating a components folder inside the src folder where your Vue components will reside. The components will be the building blocks of your app.
+
+src/
+  components/
+    Display.vue
+    Buttons.vue
+    Calculator.vue
+
+2. Main Structure (Calculator.vue)
+
+You’ll need a main component to tie everything together. This will be your Calculator.vue component, which will include the Display and Buttons components.
+
+In this file, you’ll handle the app's state (like the current input, result, etc.) and the logic that connects the buttons to the display.
+
+Calculator.vue
+<template>
+  <div class="calculator">
+    <Display :value="currentValue" />
+    <Buttons @click="handleButtonClick" />
+  </div>
+</template>
+
+<script>
+import Display from './Display.vue';
+import Buttons from './Buttons.vue';
+
+export default {
+  components: {
+    Display,
+    Buttons,
+  },
+  data() {
+    return {
+      currentValue: '', // Track the current value to be displayed
+    };
+  },
+  methods: {
+    handleButtonClick(buttonValue) {
+      if (buttonValue === 'C') {
+        this.currentValue = ''; // Clear
+      } else if (buttonValue === '=') {
+        this.evaluate(); // Perform calculation
+      } else {
+        this.currentValue += buttonValue; // Append number/operator
+      }
+    },
+    evaluate() {
+      try {
+        this.currentValue = eval(this.currentValue).toString();
+      } catch (e) {
+        this.currentValue = 'Error'; // Handle invalid expressions
+      }
+    }
+  }
+};
+</script>
+
+<style scoped>
+/* You can add your calculator styles here */
+</style>
+
+3. Display Component
+
+The Display.vue component will show the current value of the calculation. It will be passed as a prop from Calculator.vue.
+
+Display.vue
+<template>
+  <div class="display">
+    {{ value }}
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    value: String,
+  },
+};
+</script>
+
+<style scoped>
+/* Add some basic styles to center the display */
+.display {
+  font-size: 2rem;
+  text-align: right;
+  padding: 20px;
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  min-height: 50px;
+}
+</style>
+
+4. Buttons Component
+
+This will be a set of buttons that users can click to perform calculations. It will emit a custom event when a button is clicked, passing the button value to the Calculator.vue.
+
+Buttons.vue
+<template>
+  <div class="buttons">
+    <button v-for="button in buttons" :key="button" @click="buttonClicked(button)">
+      {{ button }}
+    </button>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      buttons: ['7', '8', '9', '/', '4', '5', '6', '*', '1', '2', '3', '-', '0', '.', '=', '+', 'C'],
+    };
+  },
+  methods: {
+    buttonClicked(buttonValue) {
+      this.$emit('click', buttonValue);
+    },
+  },
+};
+</script>
+
+<style scoped>
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+button {
+  font-size: 1.5rem;
+  padding: 20px;
+  background-color: #e0e0e0;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #ccc;
+}
+</style>
+
+5. App.vue (or Main Entry Point)
+
+In your App.vue file (which is the entry point of your Vue application), you will just import the Calculator component.
+
+App.vue
+<template>
+  <div id="app">
+    <Calculator />
+  </div>
+</template>
+
+<script>
+import Calculator from './components/Calculator.vue';
+
+export default {
+  components: {
+    Calculator,
+  },
+};
+</script>
+
+<style>
+/* Add some overall styles for the app */
+#app {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #fafafa;
+}
+</style>
+
+6. Vue Router or State Management (Optional)
+
+Since this is a simple project, you don’t need Vue Router or Vuex right now. You can handle all your state directly in the Calculator.vue component. But if you want to add more features later (like a history of calculations or memory functions), you might explore Vue Router or Vuex.
+
+7. Styling and Polish
+
+You can refine your UI with custom CSS to make it look more polished. Since you are building a calculator, you might want to focus on a grid layout for the buttons, ensuring it’s responsive, and maybe adding some hover effects.
+
+Running Your Project
+
+After you’ve set up the components, you can run the project with:
+
+npm run serve
+
+
+This will start a development server, and you should see your Vue calculator in action.
