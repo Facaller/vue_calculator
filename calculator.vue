@@ -6,20 +6,26 @@
     const mathOperator = ref('');
     const resultRef = ref(null);
 
-    function add (a, b) {
-        return a + b;
+    function add () {
+        return resultRef.value = ValueOne.value + ValueTwo.value;
     }
 
-    function subtract (a, b) {
-        return a - b;
+    function subtract () {
+        return resultRef.value = ValueOne.value - ValueTwo.value;
     }
 
-    function multiply (a, b) {
-        return a * b;
+    function multiply () {
+        return resultRef.value = ValueOne.value * ValueTwo.value;
     }
 
-    function divide (a, b) {
-        return a / b;
+    function divide () {
+        return resultRef.value = ValueOne.value / ValueTwo.value;
+    }
+
+    function clear () {
+        ValueOne.value = null;
+        ValueTwo.value = null;
+        mathOperator.value = null;
     }
 
     function operate () {

@@ -153,119 +153,166 @@ Once the basic functionality is in place, you can always enhance the app further
 
 *************
 
-MENTAL MODEL
+STEP 1
 
-You're very welcome! I totally understand your mental model coming from a Vanilla JS perspective, where you think of each part of the application (like the logic and the UI) as separate classes or modules that need to be imported and connected manually. Vue (and frameworks like it) works a little differently because of its reactive data model and the way components interact. Let's break it down in a way that highlights the differences and helps you understand the Vue approach.
+Key Steps to Integrate Calculator.vue into App.vue:
 
-Vanilla JS Mental Model:
+Import the Calculator component into App.vue.
 
-In Vanilla JS, you're likely thinking of your UI and logic as separate entities. For example:
+Use the Calculator component in the template of App.vue to render it.
 
-You might have a Calculator module that handles the logic (adding, subtracting, etc.).
+Pass and manage the data between App.vue and Calculator.vue via props and events.
 
-You might then import this Calculator module into the Buttons module, which is responsible for the DOM and UI rendering.
+Step-by-Step Guide
+1. Import the Calculator Component in App.vue
 
-In the Buttons module, you'd attach the logic from Calculator to specific HTML elements (e.g., a click event that calls the add() method from Calculator).
+First, you'll need to import your Calculator.vue component into your App.vue file.
 
-This makes sense in a modular approach where each module has a specific task, and you connect them manually.
+<script setup>
+import Calculator from './Calculator.vue'; // Adjust the path if necessary
+</script>
 
-How Vue Differs from Vanilla JS:
+<template>
+  <div>
+    <h1>Vue Calculator</h1>
+    <Calculator />
+  </div>
+</template>
 
-Vue is built around the concept of components, which are self-contained units that:
+<style scoped>
+/* Add any global styles or scoped styles for App.vue here */
+</style>
 
-Encapsulate logic (methods, state, etc.)
+2. Pass Data or Events to/from Calculator (Optional)
 
-Encapsulate the template (UI)
+For now, your Calculator.vue is self-contained, so you might not need to pass any data directly to App.vue unless you want to show the result in App.vue.
 
-Communicate via data and events between components.
+If you want to display the result calculated in Calculator.vue in the App.vue template, you could use props and events to communicate.
 
-In Vue, you don't need to import one component into another like you would with Vanilla JS. Instead, components can communicate by passing data down (via props) and sending events up to their parent components.
+Here's an example of how to pass the result from Calculator.vue to App.vue:
 
-Key Differences in Vue's Approach:
+Update Calculator.vue:
 
-Component Structure:
+You will emit the result to App.vue whenever the calculation is done.
 
-In Vanilla JS: You might have a Calculator class and a Button class, and you'd explicitly call methods from one inside the other.
+<script setup>
+import { ref, defineEmits } from 'vue';
 
-In Vue: You have Calculator.vue, Button.vue, and other components. The components handle both logic and template (UI) in a single unit. Each component is responsible for a specific aspect of the app, but they communicate with each other via props and events.
+const ValueOne = ref(null);
+const ValueTwo = ref(null);
+const mathOperator = ref('');
+const resultRef = ref(null);
 
-Communication Between Components:
+const emit = defineEmits();  // Use this to emit events
 
-In Vanilla JS: You would import a class or module into another and call its methods (like Calculator.add()) directly from a UI event (like a button click).
+function add () {
+    return resultRef.value = ValueOne.value + ValueTwo.value;
+}
 
-In Vue: You don’t import Calculator.vue into Button.vue. Instead, the Button.vue emits an event (e.g., button-click), which the parent component (App.vue) listens for. The parent component then calls the logic inside the Calculator.vue component to handle the calculation.
+function subtract () {
+    return resultRef.value = ValueOne.value - ValueTwo.value;
+}
 
-Vue's Reactivity:
+function multiply () {
+    return resultRef.value = ValueOne.value * ValueTwo.value;
+}
 
-In Vanilla JS: You would manually manipulate the DOM and update values yourself when the state changes (e.g., updating the value of an input field or result).
+function divide () {
+    return resultRef.value = ValueOne.value / ValueTwo.value;
+}
 
-In Vue: Vue handles updates automatically via its reactive data system. When the state (like ValueOne, ValueTwo, mathOperator) changes, the DOM is automatically updated without you manually manipulating the HTML.
+function clear () {
+    ValueOne.value = null;
+    ValueTwo.value = null;
+    mathOperator.value = null;
+}
 
-Separation of Concerns:
+function operate () {
+    const a = ValueOne.value;
+    const b = ValueTwo.value;
+    const operator = mathOperator.value;
 
-In Vanilla JS: You separate concerns by having distinct modules that handle logic and UI, and then manually connect them.
+    let result;
+    
+    switch (operator) {
+        case '+':
+            result = add();
+            break;
+        case '-':
+            result = subtract();
+            break;
+        case '*':
+            result = multiply();
+            break;
+        case '/':
+            result = divide();
+            break;
+        default:
+            result = 0;
+    }
+    resultRef.value = result;
+    
+    // Emit the result to the parent (App.vue)
+    emit('result', resultRef.value);
+}
+</script>
 
-In Vue: The components themselves are self-contained. The UI and logic live together in a component, and communication between components happens through props (to pass data) and events (to send messages).
+<template>
+  <!-- You can add your template for buttons and other logic here -->
+</template>
 
-Vue Component Workflow Example (How it Works)
-App.vue (Parent Component):
+Update App.vue:
 
-This is the "hub" of your app. It will hold the state and logic for the entire application. It will listen for events from Button.vue and pass necessary data (like the current value or result) to Display.vue.
+Now, in App.vue, listen for the result event emitted by the Calculator component.
 
-App.vue doesn't need to directly import Calculator.vue inside Button.vue. Instead, App.vue will listen for button clicks from Button.vue, handle the logic (via methods or passing props), and pass down the results to the Display.vue.
+<script setup>
+import { ref } from 'vue';
+import Calculator from './Calculator.vue';
 
-Buttons.vue (Child Component):
+const result = ref(null); // Store the result here
+</script>
 
-This component is purely for UI rendering. It doesn't need to know the specifics of the calculation logic. It just knows how to emit events (like @click="buttonClickHandler").
+<template>
+  <div>
+    <h1>Vue Calculator</h1>
+    <!-- Pass the result event from Calculator to App -->
+    <Calculator @result="result = $event" />
 
-It emits events when buttons are clicked (like @button-click for 1, +, =), and App.vue will catch these events and pass the necessary data to the Calculator.vue for processing.
+    <div v-if="result !== null">
+      <h2>Result: {{ result }}</h2>
+    </div>
+  </div>
+</template>
 
-Calculator.vue (Logic Component):
+<style scoped>
+/* Add your styles for App.vue here */
+</style>
 
-Calculator.vue doesn't need to be imported into Button.vue. Instead, App.vue can communicate with it.
+Explanation:
 
-Calculator.vue contains the logic, methods (like add(), subtract()), and state (like ValueOne, ValueTwo).
+defineEmits() in Calculator.vue: This function is used to define events that the component can emit. When the calculation is done in the Calculator component, you emit the result using emit('result', resultRef.value);.
 
-The Calculator.vue component will be triggered when an event is sent from the parent (App.vue). It processes the logic and sends the result back to App.vue, which then updates the Display.vue.
+Event Binding (@result="result = $event") in App.vue: In App.vue, we listen for the result event from the Calculator component. The @result="result = $event" syntax binds the emitted result to a local result variable in App.vue.
 
-How Components Interact in Vue:
+Displaying the Result: Once the result is passed back from Calculator to App.vue, we display it in the <div> tag in the App.vue template.
 
-Buttons.vue emits events like @click="buttonClicked" when a user clicks a button (e.g., 1, +, =).
+If You Don't Need to Pass the Result Back Yet:
 
-App.vue listens for the emitted event, like @button-click="handleButtonClick", and then:
+If you just want to get Calculator working in isolation and don't need to pass the result back to App.vue yet, you can skip the event handling part and just focus on rendering Calculator in App.vue.
 
-Updates its own state (e.g., currentValue).
+<template>
+  <div>
+    <h1>Vue Calculator</h1>
+    <Calculator />
+  </div>
+</template>
 
-Sends the updated state to Display.vue to show the value.
+Conclusion:
 
-Calls the methods inside Calculator.vue for actual calculations when necessary (e.g., when = is clicked).
+Import and render the Calculator component in App.vue like a normal Vue component.
 
-Calculator.vue has methods like add(), subtract(), etc., that perform the actual calculation logic. App.vue handles the event and updates the state accordingly.
+Use defineEmits() in Calculator.vue to emit events to App.vue if you want to pass data (like the calculation result).
 
-Visualizing Vue’s Component System:
+Listen for events in App.vue to handle the data emitted from Calculator.
 
-Let’s map out a basic flow:
-
-User clicks a button in Buttons.vue → Buttons.vue emits an event to App.vue.
-
-App.vue receives the event and updates its state or passes data to Calculator.vue for processing.
-
-Calculator.vue processes the logic (e.g., addition or subtraction), updates its state, and passes the result back to App.vue.
-
-App.vue passes the result to Display.vue, which renders it.
-
-Summary:
-
-In Vue:
-
-Components are self-contained units (logic + UI).
-
-You don’t import one component into another for logic. Instead, you pass data and communicate via events.
-
-Props allow data to flow down from parent to child, and events flow up from child to parent.
-
-In Vanilla JS:
-
-You typically have separate files/modules and import logic directly into other modules to attach events and control the flow.
-
-Vue simplifies this process by keeping everything inside a component, and it takes care of updating the DOM for you, making your code more declarative rather than imperative.
+Once you've set this up, you can start building out the UI for the buttons and display in your Calculator component and handle the logic accordingly.
