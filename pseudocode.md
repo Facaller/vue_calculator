@@ -316,3 +316,58 @@ Use defineEmits() in Calculator.vue to emit events to App.vue if you want to pas
 Listen for events in App.vue to handle the data emitted from Calculator.
 
 Once you've set this up, you can start building out the UI for the buttons and display in your Calculator component and handle the logic accordingly.
+
+
+
+****************
+
+
+FLOW
+
+Revised Data Flow (Clarified)
+
+Here’s how the flow of data will work, step-by-step:
+
+Buttons Component → App:
+The Buttons component emits events like numberClicked, operatorClicked, etc.
+App listens for these events and updates its state (ValueOne, ValueTwo, mathOperator).
+
+App → Calculator:
+App passes the updated values (ValueOne, ValueTwo, mathOperator) to the Calculator component as props.
+
+Calculator → App (via Event):
+The Calculator component emits the calculated result to App via an event (e.g., calculationResult).
+
+App → Display:
+App passes the result down to the Display component as a prop.
+
+Display → Show Final Result:
+The Display component displays the result to the user.
+
+Tips to Ensure Smooth Flow
+
+Event handling between components:
+
+Always emit events from children (Buttons or Calculator) to communicate with the parent (App).
+
+Use props to pass data from parent to child (App to Calculator, App to Display).
+
+Avoid unnecessary component-to-component communication:
+
+You don’t need to send data directly from the Buttons to the Display. Let App manage the state and pass it to the relevant components (Calculator, Display).
+
+Keep components focused on their roles:
+
+Buttons: Only responsible for emitting the user’s actions.
+
+Calculator: Holds the logic and does the calculation.
+
+Display: Only displays the result.
+
+App: Manages state and coordinates data flow.
+
+Visualization of Data Flow (Simplified)
+[Buttons] ---> [App] ---> [Calculator] ---> [App] ---> [Display]
+   |                |             |            |
+   v                v             v            v
+ Emit events  Pass props  Emit result   Pass result to Display
