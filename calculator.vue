@@ -1,10 +1,11 @@
 <script setup>
-    import {ref} from 'vue';
+    import {ref, defineEmits} from 'vue';
 
     const ValueOne = ref(null);
     const ValueTwo = ref(null);
     const mathOperator = ref('');
     const resultRef = ref(null);
+    const emit = defineEmits();
 
     function add () {
         return resultRef.value = ValueOne.value + ValueTwo.value;
@@ -52,6 +53,7 @@
                 result = 0;
         }
         resultRef.value = result;
+        emit('result', resultRef.value);
     }
 
 </script>

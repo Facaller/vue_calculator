@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
-import { defineEmits } from 'vue';
+import {ref, defineEmits} from 'vue';
+
 </script>
 
 <template>
