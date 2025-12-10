@@ -1,42 +1,37 @@
-<script setup>
-    import {ref, defineEmits} from 'vue';
+import { ref } from 'vue'
+
+export function useCalculator() {
 
     const ValueOne = ref(null);
     const ValueTwo = ref(null);
     const mathOperator = ref('');
-    const resultRef = ref(null);
-    const emit = defineEmits();
+    const result = ref(null);
 
     function add () {
-        return resultRef.value = ValueOne.value + ValueTwo.value;
+        return result.value = ValueOne.value + ValueTwo.value;
     }
 
     function subtract () {
-        return resultRef.value = ValueOne.value - ValueTwo.value;
+        return result.value = ValueOne.value - ValueTwo.value;
     }
 
     function multiply () {
-        return resultRef.value = ValueOne.value * ValueTwo.value;
+        return result.value = ValueOne.value * ValueTwo.value;
     }
 
     function divide () {
-        return resultRef.value = ValueOne.value / ValueTwo.value;
+        return result.value = ValueOne.value / ValueTwo.value;
     }
 
     function clear () {
         ValueOne.value = null;
         ValueTwo.value = null;
-        mathOperator.value = null;
+        mathOperator.value = '';
+        result.value = null;
     }
 
     function operate () {
-        const a = ValueOne.value;
-        const b = ValueTwo.value;
-        const operator = mathOperator.value;
-
-        let result;
-        
-        switch (operator) {
+        switch (mathOperator.value) {
             case '+':
                 result = add(a, b);
                 break;
@@ -52,16 +47,14 @@
             default:
                 result = 0;
         }
-        resultRef.value = result;
-        emit('result', resultRef.value);
     }
 
-</script>
-
-<template>
-
-</template>
-
-<style scoped>
-
-</style>
+    return {
+        ValueOne,
+        ValueTwo,
+        mathOperator,
+        result,
+        operate,
+        clear
+    };
+}
