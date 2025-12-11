@@ -1,373 +1,218 @@
+The Template
 
-5. Calling operate from the template
+Right now, your <template> is empty, but this is where you’ll lay out how the user interacts with the app and how the data flows between the components.
 
-Next, you want to trigger this function when the user does something — like pressing a button. This is how you'd wire it up in Vue:
+How Logic Flows with Props and Emits
 
-Let’s say you have buttons for each operator in your template. You can bind a click event that calls operate:
+Let’s go step by step on how the components communicate using props and emits, based on your existing setup.
+
+1. Passing Data with Props
+
+If you want to pass data from your main app to your child components, you’d use props.
+
+For example, if your display component needs to show the result of the calculation, you’d pass the result variable from the main component to the display component like this:
+
+<display :result="result" />
+
+
+Here:
+
+:result="result": This is passing the result from the parent component to the display component as a prop called result.
+
+Inside the display.vue component, you’ll define this prop to be received by the component:
+
+props: {
+  result: {
+    type: Number, // or String depending on your calculation output
+    default: null
+  }
+}
+
+
+Now, the display component can use result to show the current value.
+
+2. Emitting Events with Emits
+
+If a child component (like a button) needs to notify the parent (main app) about something, you use emits. For instance, when a button is clicked in the buttons component, it may want to send a signal to the parent to update the result.
+
+In the buttons.vue component, you might have something like:
 
 <template>
-  <div>
-    <!-- Two inputs for ValueOne and ValueTwo -->
-    <input v-model="ValueOne" type="number" placeholder="Enter value one" />
-    <input v-model="ValueTwo" type="number" placeholder="Enter value two" />
-
-    <!-- Operator buttons -->
-    <button @click="mathOperator = '+'">+</button>
-    <button @click="mathOperator = '-'">-</button>
-    <button @click="mathOperator = '*'">*</button>
-    <button @click="mathOperator = '/'">/</button>
-
-    <!-- Result button -->
-    <button @click="operate">Calculate</button>
-
-    <!-- Display the result -->
-    <div>{{ resultRef }}</div>
-  </div>
+  <button @click="sendButtonClick">Click me</button>
 </template>
 
+<script setup>
+import { defineEmits } from 'vue';
 
-Notice a few things:
+const emit = defineEmits();
 
-v-model binds the input fields to the ValueOne and ValueTwo refs.
+const sendButtonClick = () => {
+  // Notify the parent about the button click event
+  emit('button-click', 'some value');
+};
+</script>
 
-The operator buttons set the mathOperator ref when clicked.
 
-The Calculate button triggers the operate() function.
+Here:
 
+defineEmits() is used to declare events that this component can emit.
 
+When the button is clicked, the sendButtonClick function is called, which in turn emits an event called 'button-click'.
 
-***********************
-STEP BY STEP PLAN
+This event can then be caught in the parent component.
 
-Step-by-Step Guide: Building the Rest of the Calculator
-1. Set Up the App.vue (Main Entry Point)
+In the parent component, you can catch the event like this:
 
-The App.vue file is going to serve as the container and will hold your calculator's main components (Display.vue and Buttons.vue). You'll use this file to manage the overall layout of your app and pass data between the components.
+<buttons @button-click="handleButtonClick" />
 
-Tasks:
 
-Import the Components: You’ll need to import Display.vue and Buttons.vue into App.vue.
+Then, you define a method handleButtonClick in your main component:
 
-Manage State in App.vue: Since App.vue will be the parent, it needs to store the current value of the display. You can pass this value down to Display.vue.
+const handleButtonClick = (value) => {
+  // Handle the value passed from the button click
+  console.log(value);
+};
 
-Handle Events: Listen to events from Buttons.vue in App.vue and pass the necessary values to Calculator.vue to process the calculations.
 
-2. Set Up Display.vue (Display Current Value)
+In your handleButtonClick method, you could then call your calculator logic from the composable to update the result.
 
-The Display.vue component will be responsible for showing the current input or result.
+3. Using the Calculator Logic
 
-Tasks:
+Now, since you have useCalculator imported, you’d want to use it to handle the calculator logic. You can call the methods and reactive properties defined in your useCalculator composable to update the result.
 
-Create the Display Component: This component should take a prop (let’s call it value) that will represent the current value or result of the calculation.
+Let’s assume your composable has methods like add(), subtract(), clear(), etc., and reactive properties like currentValue.
 
-Render the Value: Inside Display.vue, display the value passed from the parent (App.vue).
+Here’s how you might use it:
 
-3. Set Up Buttons.vue (Rendering Calculator Buttons)
+const { currentValue, add, subtract, clear } = useCalculator();
 
-The Buttons.vue component will render the calculator's buttons, including the numbers 1-9 and the four basic operators. It will emit an event when a button is clicked.
+// Now, when the button click is handled, you can call your logic:
+const handleButtonClick = (buttonValue) => {
+  if (buttonValue === '+') {
+    add();
+  } else if (buttonValue === '-') {
+    subtract();
+  } else if (buttonValue === 'clear') {
+    clear();
+  }
+  result.value = currentValue.value; // Sync the result to display
+};
 
-Tasks:
 
-Define Buttons: Create an array in Buttons.vue for all the buttons. This array should include numbers (1-9), operators (+, -, *, /), and any other necessary buttons (like = and C for clear).
+In this code:
 
-Button UI: Use a loop (v-for) to render each button on the screen.
+useCalculator() gives you access to the logic inside your composable, including any reactive variables and methods.
 
-Emit Events: When a button is clicked, emit an event that sends the button value (e.g., the number or operator) to the parent component (App.vue), which will then handle the action.
+When the button is clicked, handleButtonClick updates the currentValue (from your composable) based on the clicked button.
 
-4. Integrate Calculator.vue with App.vue
+The result variable is then updated with the latest value from currentValue, which will update the UI automatically, thanks to Vue’s reactivity.
 
-Now that your Calculator.vue has logic for performing the operations, you need to wire it up with the Buttons.vue and Display.vue components via App.vue.
+Conclusion
 
-Tasks:
+To summarize:
 
-Pass State to Display: You’ll need to pass the current value or result from Calculator.vue to Display.vue so it can be shown in the UI.
+Props are used to pass data down to child components.
 
-Handle Button Clicks: In App.vue, listen to events emitted from Buttons.vue (like button-click or something similar). When a button is clicked, you should update the state in Calculator.vue accordingly.
+Emits are used to send events or data back up to the parent component.
 
-Perform Calculations: When the calculation is triggered (e.g., the "=" button is clicked), App.vue should call the operate method in Calculator.vue and pass the correct values to perform the operation.
+Reactive variables (like ref) allow Vue to automatically update the UI whenever the value changes.
 
-5. Refine the Logic in Calculator.vue
+Composables like useCalculator help separate your logic from the component, making it reusable.
 
-The calculation logic in Calculator.vue is already in place, but there are a few improvements you can make:
+Does that make sense? Would you like to dive into more specific examples or explore a particular part of this flow?
 
-Tasks:
+******************
 
-Handle Input Concatenation: Right now, it looks like you are only dealing with two values (ValueOne and ValueTwo). You'll want to update this to handle multiple numbers and operators as they’re entered. Essentially, you should accumulate the input (e.g., if someone types 1 + 2, you’ll want to store "1", then "+", then "2").
 
-Clear Functionality: Add a clear() method that resets all values to their initial state.
+BUTTON CLICKS
 
-Edge Cases: Handle edge cases, such as dividing by zero or showing an error when the input is invalid.
 
-6. Refactor Components for Clean Communication
+Sure! I’ll provide a minimal example to give you the core idea of how button clicks are handled and how you can pass values to the method. This will give you the framework, but you’ll fill in the logic based on your needs.
 
-Once you have the basic functionality working, it's a good idea to refine how your components communicate. Since your components are already separate, communication between them should be done via props (for data flow) and events (for actions like button clicks).
+1. Buttons Component
 
-Tasks:
-
-Props in Display.vue: Ensure that the value prop is passed from the parent to Display.vue correctly.
-
-Events from Buttons.vue: Ensure the button clicks in Buttons.vue emit events that App.vue can catch. When a button is clicked, the event should trigger the necessary logic in the parent (App.vue), which then passes the values to Calculator.vue to process the operation.
-
-7. Styling and UI Refinements
-
-Once the logic is in place, you can work on making your calculator look nice by styling it.
-
-Tasks:
-
-Use Scoped Styles: Use the <style scoped> tag in each component to ensure styles are scoped to that component only.
-
-Basic Layout: Use CSS grid or flexbox to create a responsive layout. The buttons should be arranged in a grid (3 rows for numbers and 1 for operators), and the display should be at the top.
-
-Button Styling: Style the buttons to look like typical calculator buttons (size, spacing, color).
-
-8. Test Your Application
-
-Now that all the core features are in place, thoroughly test your app.
-
-Tasks:
-
-Test Button Clicks: Ensure that when you click buttons, the correct values are shown in the display.
-
-Test Operations: Ensure that the calculator performs the correct calculations when you click the operators and then the equal sign.
-
-Edge Case Testing: Test how your app behaves with invalid inputs (e.g., 0 / 0 or consecutive operators like 5 ++ 2).
-
-Final Checklist:
-
-App.vue: Manages overall layout, coordinates state, and handles events.
-
-Display.vue: Receives the current value as a prop and displays it.
-
-Buttons.vue: Renders buttons and emits events when clicked.
-
-Calculator.vue: Manages calculation logic and state.
-
-Styling: Add styling to buttons, display, and layout to make the UI intuitive and polished.
-
-Next Steps:
-
-As a beginner, you’re already on the right path by structuring the app with separate components for each concern. Take things step by step, and don’t hesitate to check the Vue documentation if you need clarification. After each step, test and make sure everything is working as expected.
-
-Once the basic functionality is in place, you can always enhance the app further — for example, by adding more complex features like keyboard support, memory buttons (like M+, M-), or more advanced error handling.
-
-
-*************
-
-STEP 1
-
-Key Steps to Integrate Calculator.vue into App.vue:
-
-Import the Calculator component into App.vue.
-
-Use the Calculator component in the template of App.vue to render it.
-
-Pass and manage the data between App.vue and Calculator.vue via props and events.
-
-Step-by-Step Guide
-1. Import the Calculator Component in App.vue
-
-First, you'll need to import your Calculator.vue component into your App.vue file.
+You’ll define a button for each calculator key. For now, let's assume you have basic number and operator buttons. Each button will trigger the same buttonClick method but will send different values (the button's label).
 
 <script setup>
-import Calculator from './Calculator.vue'; // Adjust the path if necessary
+import { defineEmits } from 'vue';
+
+const emit = defineEmits();
+
+// Method to handle button clicks
+const buttonClick = (value) => {
+  emit('button-click', value); // Send the value to the parent component
+};
 </script>
 
 <template>
   <div>
-    <h1>Vue Calculator</h1>
-    <Calculator />
-  </div>
-</template>
-
-<style scoped>
-/* Add any global styles or scoped styles for App.vue here */
-</style>
-
-2. Pass Data or Events to/from Calculator (Optional)
-
-For now, your Calculator.vue is self-contained, so you might not need to pass any data directly to App.vue unless you want to show the result in App.vue.
-
-If you want to display the result calculated in Calculator.vue in the App.vue template, you could use props and events to communicate.
-
-Here's an example of how to pass the result from Calculator.vue to App.vue:
-
-Update Calculator.vue:
-
-You will emit the result to App.vue whenever the calculation is done.
-
-<script setup>
-import { ref, defineEmits } from 'vue';
-
-const ValueOne = ref(null);
-const ValueTwo = ref(null);
-const mathOperator = ref('');
-const resultRef = ref(null);
-
-const emit = defineEmits();  // Use this to emit events
-
-function add () {
-    return resultRef.value = ValueOne.value + ValueTwo.value;
-}
-
-function subtract () {
-    return resultRef.value = ValueOne.value - ValueTwo.value;
-}
-
-function multiply () {
-    return resultRef.value = ValueOne.value * ValueTwo.value;
-}
-
-function divide () {
-    return resultRef.value = ValueOne.value / ValueTwo.value;
-}
-
-function clear () {
-    ValueOne.value = null;
-    ValueTwo.value = null;
-    mathOperator.value = null;
-}
-
-function operate () {
-    const a = ValueOne.value;
-    const b = ValueTwo.value;
-    const operator = mathOperator.value;
-
-    let result;
-    
-    switch (operator) {
-        case '+':
-            result = add();
-            break;
-        case '-':
-            result = subtract();
-            break;
-        case '*':
-            result = multiply();
-            break;
-        case '/':
-            result = divide();
-            break;
-        default:
-            result = 0;
-    }
-    resultRef.value = result;
-    
-    // Emit the result to the parent (App.vue)
-    emit('result', resultRef.value);
-}
-</script>
-
-<template>
-  <!-- You can add your template for buttons and other logic here -->
-</template>
-
-Update App.vue:
-
-Now, in App.vue, listen for the result event emitted by the Calculator component.
-
-<script setup>
-import { ref } from 'vue';
-import Calculator from './Calculator.vue';
-
-const result = ref(null); // Store the result here
-</script>
-
-<template>
-  <div>
-    <h1>Vue Calculator</h1>
-    <!-- Pass the result event from Calculator to App -->
-    <Calculator @result="result = $event" />
-
-    <div v-if="result !== null">
-      <h2>Result: {{ result }}</h2>
+    <div>
+      <button @click="buttonClick('7')">7</button>
+      <button @click="buttonClick('8')">8</button>
+      <button @click="buttonClick('9')">9</button>
+      <button @click="buttonClick('÷')">÷</button>
     </div>
+    <div>
+      <button @click="buttonClick('4')">4</button>
+      <button @click="buttonClick('5')">5</button>
+      <button @click="buttonClick('6')">6</button>
+      <button @click="buttonClick('×')">×</button>
+    </div>
+    <!-- You can keep going for the rest of the buttons -->
   </div>
 </template>
-
-<style scoped>
-/* Add your styles for App.vue here */
-</style>
 
 Explanation:
 
-defineEmits() in Calculator.vue: This function is used to define events that the component can emit. When the calculation is done in the Calculator component, you emit the result using emit('result', resultRef.value);.
+@click="buttonClick('7')": When the button is clicked, the value '7' is passed as an argument to the buttonClick method.
 
-Event Binding (@result="result = $event") in App.vue: In App.vue, we listen for the result event from the Calculator component. The @result="result = $event" syntax binds the emitted result to a local result variable in App.vue.
+buttonClick('7'): This method sends the value to the parent component (you’ll define this using emit('button-click', value)), so the parent knows which button was clicked.
 
-Displaying the Result: Once the result is passed back from Calculator to App.vue, we display it in the <div> tag in the App.vue template.
+2. Parent Component (App Component)
 
-If You Don't Need to Pass the Result Back Yet:
+In the parent component, you need to catch the emitted event ('button-click') and do something with the value — for example, append it to a display or handle the calculation.
 
-If you just want to get Calculator working in isolation and don't need to pass the result back to App.vue yet, you can skip the event handling part and just focus on rendering Calculator in App.vue.
+<script setup>
+import { ref } from 'vue';
+import Buttons from './components/Buttons.vue'; // import your Buttons component
+
+const displayValue = ref(''); // Holds the value to display
+
+// Method to handle the button click in the parent
+const handleButtonClick = (value) => {
+  displayValue.value += value; // Add the clicked value to the display
+};
+</script>
 
 <template>
   <div>
-    <h1>Vue Calculator</h1>
-    <Calculator />
+    <h1>{{ displayValue }}</h1> <!-- This will show the current value -->
+    <Buttons @button-click="handleButtonClick" />
   </div>
 </template>
 
-Conclusion:
+Explanation:
 
-Import and render the Calculator component in App.vue like a normal Vue component.
+<Buttons @button-click="handleButtonClick" />: This listens for the button-click event from the child (Buttons component).
 
-Use defineEmits() in Calculator.vue to emit events to App.vue if you want to pass data (like the calculation result).
+handleButtonClick(value): When a button is clicked, the value passed from the child (e.g., '7', '+', etc.) is appended to the displayValue.
 
-Listen for events in App.vue to handle the data emitted from Calculator.
+displayValue: The reactive variable that stores what you’ll display on the screen (the result).
 
-Once you've set this up, you can start building out the UI for the buttons and display in your Calculator component and handle the logic accordingly.
+What Happens:
 
+Button click in child: When you click on a button like "7", the buttonClick('7') method in the child triggers.
 
+Emit to Parent: This method emits the 'button-click' event with '7' as the value.
 
-****************
+Parent listens: The parent listens for this event and calls handleButtonClick with the value '7'.
 
+Update Display: The displayValue is updated by appending the value '7' to it, and Vue re-renders the display automatically because displayValue is reactive.
 
-FLOW
+Next Steps You Can Take:
 
-Revised Data Flow (Clarified)
+Handle operators: You can differentiate the button clicks for numbers vs. operators (like +, ×) and update the calculation logic accordingly.
 
-Here’s how the flow of data will work, step-by-step:
+Clear display: You can add a button for clearing the display, which would just reset displayValue to an empty string.
 
-Buttons Component → App:
-The Buttons component emits events like numberClicked, operatorClicked, etc.
-App listens for these events and updates its state (ValueOne, ValueTwo, mathOperator).
-
-App → Calculator:
-App passes the updated values (ValueOne, ValueTwo, mathOperator) to the Calculator component as props.
-
-Calculator → App (via Event):
-The Calculator component emits the calculated result to App via an event (e.g., calculationResult).
-
-App → Display:
-App passes the result down to the Display component as a prop.
-
-Display → Show Final Result:
-The Display component displays the result to the user.
-
-Tips to Ensure Smooth Flow
-
-Event handling between components:
-
-Always emit events from children (Buttons or Calculator) to communicate with the parent (App).
-
-Use props to pass data from parent to child (App to Calculator, App to Display).
-
-Avoid unnecessary component-to-component communication:
-
-You don’t need to send data directly from the Buttons to the Display. Let App manage the state and pass it to the relevant components (Calculator, Display).
-
-Keep components focused on their roles:
-
-Buttons: Only responsible for emitting the user’s actions.
-
-Calculator: Holds the logic and does the calculation.
-
-Display: Only displays the result.
-
-App: Manages state and coordinates data flow.
-
-Visualization of Data Flow (Simplified)
-[Buttons] ---> [App] ---> [Calculator] ---> [App] ---> [Display]
-   |                |             |            |
-   v                v             v            v
- Emit events  Pass props  Emit result   Pass result to Display
+Evaluate expressions: Once you have all the numbers and operators, you can evaluate the final expression when the = button is clicked.
