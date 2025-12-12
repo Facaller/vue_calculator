@@ -216,3 +216,124 @@ Handle operators: You can differentiate the button clicks for numbers vs. operat
 Clear display: You can add a button for clearing the display, which would just reset displayValue to an empty string.
 
 Evaluate expressions: Once you have all the numbers and operators, you can evaluate the final expression when the = button is clicked.
+
+
+
+**************
+
+
+FLOW 
+
+
+How data should flow
+1. Buttons component → App
+
+Your buttons component emits the value of the clicked button:
+
+<Button @press="handleButtonPress" />
+
+2. App → Composable → App
+
+Your composable useCalculator() returns reactive values (like displayValue).
+Your App.vue updates these values based on button presses.
+
+3. App → Display
+
+Your Display.vue receives the reactive display value as a prop:
+
+<Display :value="displayValue" />
+
+
+That’s it — props automatically update reactively.
+
+✔️ Working Example (Simple + Correct)
+
+Below is a clean version of how your files should look.
+
+App.vue
+<script setup>
+import { ref } from 'vue'
+import Display from './components/Display.vue'
+import Buttons from './components/Buttons.vue'
+import { useCalculator } from './composables/calculator'
+
+// --- get state & functions from composable ---
+const { displayValue, handleInput } = useCalculator()
+
+// button component emits values → forward to composable
+function onButtonPress(val) {
+  handleInput(val)
+}
+</script>
+
+<template>
+  <div>
+    <Display :value="displayValue" />
+
+    <Buttons @press="onButtonPress" />
+  </div>
+</template>
+
+Display.vue
+<script setup>
+import { defineProps } from 'vue'
+
+const props = defineProps({
+  value: {
+    type: String,
+    required: true
+  }
+})
+</script>
+
+<template>
+  <div class="display">
+    {{ value }}
+  </div>
+</template>
+
+<style scoped>
+.display {
+  font-size: 32px;
+  padding: 10px;
+}
+</style>
+
+
+✔ This display automatically updates whenever displayValue changes.
+
+Buttons.vue (example)
+<script setup>
+const emit = defineEmits(['press'])
+
+function press(val) {
+  emit('press', val)
+}
+</script>
+
+<template>
+  <div class="buttons">
+    <button @click="press('4')">4</button>
+    <button @click="press('+')">+</button>
+    <button @click="press('6')">6</button>
+  </div>
+</template>
+
+Composable (useCalculator.js)
+
+A very simple version just to show the pattern:
+
+import { ref } from 'vue'
+
+export function useCalculator() {
+  const displayValue = ref('')
+
+  function handleInput(val) {
+    displayValue.value += val
+  }
+
+  return {
+    displayValue,
+    handleInput
+  }
+}

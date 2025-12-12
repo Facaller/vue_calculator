@@ -1,5 +1,7 @@
 <script setup>
-import {ref, defineEmits} from 'vue';
+import {ref, defineEmits, defineProps} from 'vue';
+
+const props = defineProps()
 
 </script>
 
