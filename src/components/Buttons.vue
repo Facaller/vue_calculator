@@ -1,7 +1,7 @@
 <script setup>
-import {ref, defineEmits} from 'vue';
+import {defineEmits} from 'vue';
 
-const emit = defineEmits();
+const emit = defineEmits(['button-click']);
 const buttonClick = (value) => {
     emit('button-click', value)
 };

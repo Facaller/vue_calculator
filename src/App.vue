@@ -1,8 +1,8 @@
 <script setup>
   import { ref, defineProps } from 'vue';
   import { useCalculator } from './composables/calculator';
-  import { buttons } from './components/buttons.vue'
-  import { display} from './components/display.vue'
+  import { Buttons } from './components/buttons.vue'
+  import { Display} from './components/display.vue'
 
   const displayResult = ref(null);
   const { ValueOne,
@@ -16,9 +16,9 @@
 
 <template>
   <div>
-    <display :result = "result" /> 
+    <Display :result = "result" /> 
 
-    <buttons @click = "handleButtonClick">
+    <Buttons @click = "handleButtonClick">
   </div>
 </template>
 
