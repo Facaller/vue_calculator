@@ -1,10 +1,8 @@
 <script setup>
-  import { ref, defineProps } from 'vue';
   import { useCalculator } from './composables/calculator';
-  import { Buttons } from './components/buttons.vue'
-  import { Display} from './components/display.vue'
+  import Buttons from './components/buttons.vue'
+  import Display from './components/display.vue'
 
-  const displayResult = ref(null);
   const { ValueOne,
           ValueTwo,
           mathOperator,
@@ -12,13 +10,31 @@
           operate,
           clear } = useCalculator();
 
+  const handleButtonClick = (value) => {
+    if (value === 'C') {
+      clear();
+      return;
+    }
+    
+    while (!mathOperator.value) {
+      ValueOne += value;
+    }
+    while (mathOperator) {
+      ValueTwo += value
+    }
+
+    if (value === '=') {
+      operate(mathOperator.value)
+    }
+  };
+
 </script>
 
 <template>
   <div>
-    <Display :result = "result" /> 
+    <Display :result="result" /> 
 
-    <Buttons @click = "handleButtonClick">
+    <Buttons @button-click="handleButtonClick">
   </div>
 </template>
 
