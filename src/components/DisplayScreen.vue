@@ -2,6 +2,14 @@
 import {defineProps} from 'vue';
 
 const props = defineProps({
+    valueOne: {
+        type: [Number],
+        default: 0
+    },
+    valueTwo: {
+        type: [Number],
+        default: 0
+    },
     result: {
         type: [Number, String],
         default: 0,
@@ -12,7 +20,7 @@ const props = defineProps({
 
 <template>
     <div>
-        <p>{{ result }}</p>
+        <p>{{ props.result }}</p>
     </div>
 </template>
 

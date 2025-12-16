@@ -20,7 +20,11 @@ export function useCalculator() {
     }
 
     function divide () {
-        return result.value = ValueOne.value / ValueTwo.value;
+        if (ValueTwo.value === 0) {
+            result.value = 'Error';
+        } else {
+            return result.value = ValueOne.value / ValueTwo.value;
+        }
     }
 
     function clear () {
