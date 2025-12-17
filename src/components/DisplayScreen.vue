@@ -19,11 +19,13 @@ const props = defineProps({
 </script>
 
 <template>
-    <div>
+    <div class="display">
         <p>{{ props.result }}</p>
     </div>
 </template>
 
 <style scoped>
-
+    .display {
+        border: 5px solid red;
+    }
 </style>
