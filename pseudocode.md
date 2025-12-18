@@ -1,93 +1,209 @@
-Your Understanding So Far:
+1. How to Break handleButtonClick Into Helpers
+Goal (keep this in mind)
 
-User Clicks a Button (e.g., Number):
+Each helper should:
 
-numberClick is triggered when a number button (like '7') is clicked.
+Do one small thing
 
-What Happens Inside numberClick:
+Have a clear name
 
-numberClick(value) takes the value of the clicked button ('7' in this case).
+Be easy to read without comments
 
-Then, numberClick emits an event (called button-click) to the parent component. The event name button-click is defined by defineEmits(['button-click']) in your child component (the button component).
+We’ll end up with:
 
-You pass an object { type: 'operand', value: '7' } with the emit, which contains two pieces of information:
+handleClear
 
-type: 'operand': This tells the parent that this is an operand (a number).
+handleOperand
 
-value: '7': This is the actual value of the number clicked.
+handleEquals
 
-What Happens in the Parent Component:
+handleOperator
 
-The parent component listens for the button-click event (because it's the event you defined in defineEmits).
+Step 1: Create the Helpers
 
-When the parent receives this event, it checks the object that was passed.
+Put these above handleButtonClick in your <script setup>.
 
-It looks at the type to see if it’s an operand (number) or an operator.
-
-Then it takes the value (the actual number or operator) and processes it as needed.
-
-Let’s Dive into the Details:
-
-Event Emission in Vue (emit):
-
-In Vue, you use defineEmits to define what kind of events this component can emit. This is done in the child component (the button component in your case).
-
-When a button is clicked, a function like numberClick or operatorClick is triggered. Inside these functions, you use emit to send a message to the parent.
-
-The line:
-
-const emit = defineEmits(['button-click']);
-
-
-declares that this child component can emit the button-click event. So whenever a button is clicked, the corresponding numberClick or operatorClick function will call emit('button-click', {...}) to send the data.
-
-Why Use Objects to Emit?:
-
-Emitting an object allows you to pass multiple pieces of related data (like type and value) at once. This is cleaner and more flexible than emitting separate events like number-click and operator-click.
-
-type helps the parent component differentiate between operands and operators.
-
-value is the actual button value (e.g., '7', '+').
-
-How the Parent Listens to button-click:
-
-In the parent component, you listen for the button-click event by binding it to a method like this:
-
-<Calculator @button-click="handleButtonClick" />
-
-
-Here, @button-click="handleButtonClick" listens for the button-click event and calls the handleButtonClick method when the event is emitted.
-
-Processing the Data in the Parent:
-
-When the parent component receives the event, the handler (handleButtonClick) gets the data (the object { type: 'operand', value: '7' } or { type: 'operator', value: '+' }).
-
-You can then use the type property to determine whether it's an operand or operator and handle it accordingly:
-
-methods: {
-  handleButtonClick(payload) {
-    if (payload.type === 'operand') {
-      // Handle number click (e.g., append the number to a display or calculation string)
-    } else if (payload.type === 'operator') {
-      // Handle operator click (e.g., perform a calculation or set the operator)
-    }
+🔹 handleClear
+const handleClear = (value) => {
+  if (value === 'C') {
+    clear();
+    return true;
   }
-}
+  return false;
+};
 
-Let’s Check Your Understanding:
 
-Your explanation is almost perfect, just a few small clarifications:
+Why this is nice:
 
-What is emitted: When you call emit('button-click', {...}), it’s essentially sending the object to the parent. The key button-click is the event name, and the object you send (like { type: 'operand', value: '7' }) is the payload—the actual data being passed.
+Returns true if it handled the click
 
-Emitting vs. Listening:
+Lets handleButtonClick exit early
 
-You emit button-click in the child component when a button is clicked.
+🔹 handleOperand (numbers)
+const handleOperand = (type, value) => {
+  if (type !== 'operand') return false;
 
-The parent listens for that button-click event and processes the payload it receives.
+  if (!mathOperator.value) {
+    ValueOne.value =
+      ValueOne.value === null
+        ? Number(value)
+        : ValueOne.value * 10 + Number(value);
+  } else {
+    ValueTwo.value =
+      ValueTwo.value === null
+        ? Number(value)
+        : ValueTwo.value * 10 + Number(value);
+  }
 
-Final Clarification:
+  return true;
+};
 
-You don’t need to declare separate emits for numbers and operators (like number-click and operator-click). You’re using one emit (button-click) and differentiating the type with the object you pass.
 
-The parent can listen to button-click and decide what to do based on the object’s type field. If it's an operand, handle it as a number; if it's an operator, handle it accordingly.
+Why this helps:
+
+Only cares about numbers
+
+Doesn’t know anything about operators or equals
+
+🔹 handleEquals
+const handleEquals = (value) => {
+  if (value === '=') {
+    operate();
+    return true;
+  }
+  return false;
+};
+
+
+Very simple, very readable.
+
+🔹 handleOperator
+const handleOperator = (type, value) => {
+  if (type !== 'operator') return false;
+
+  const operatorMap = {
+    '+': '+',
+    '−': '-',
+    '×': '*',
+    '÷': '/'
+  };
+
+  if (operatorMap[value]) {
+    mathOperator.value = operatorMap[value];
+    return true;
+  }
+
+  return false;
+};
+
+Step 2: Clean handleButtonClick
+
+Now your main handler becomes tiny and readable:
+
+const handleButtonClick = (payload) => {
+  const { type, value } = payload;
+
+  if (handleClear(value)) return;
+  if (handleOperand(type, value)) return;
+  if (handleEquals(value)) return;
+  if (handleOperator(type, value)) return;
+};
+
+⭐ This is a big win
+
+Even as a beginner, you can now:
+
+Read this top-to-bottom like a checklist
+
+Add new behavior without breaking old logic
+
+Debug easily (you know where to look)
+
+2. Operator Map — Explained Simply
+
+This part:
+
+const operatorMap = {
+  '+': '+',
+  '−': '-',
+  '×': '*',
+  '÷': '/'
+};
+
+What problem does this solve?
+
+Your UI buttons use pretty symbols:
+
+×
+
+÷
+
+−
+
+But your calculator logic understands:
+
+*
+
+/
+
+-
+
+So we need a translation layer.
+
+Think of it like a dictionary 📘
+
+“When the user clicks this, use that internally.”
+
+Examples:
+
+operatorMap['×'] // '*'
+operatorMap['÷'] // '/'
+operatorMap['−'] // '-'
+
+
+So when this runs:
+
+mathOperator.value = operatorMap[value];
+
+
+You’re saying:
+
+“Take the symbol the user clicked and convert it into the operator my code understands.”
+
+Why this is better than if / else
+
+❌ Bad (hard to read, grows fast):
+
+if (value === '×') mathOperator.value = '*';
+else if (value === '÷') mathOperator.value = '/';
+else if (value === '−') mathOperator.value = '-';
+
+
+✅ Good (clear, scalable):
+
+mathOperator.value = operatorMap[value];
+
+
+If you add % later, you just add one line to the map.
+
+Big Beginner Takeaway 🌱
+
+What you’ve done here is learn three important habits:
+
+Small functions are easier to reason about
+
+Early returns simplify logic
+
+Mapping values is cleaner than condition chains
+
+These are habits professionals use every day.
+
+If you want next, we can:
+
+Move these helpers into the composable
+
+Add operator chaining
+
+Add decimal support
+
+Or refactor the display logic cleanly

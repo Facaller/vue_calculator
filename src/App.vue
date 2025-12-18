@@ -25,7 +25,7 @@
     }
 
     if (value === '=') {
-      operate(mathOperator.value)
+      operate()
       console.log(mathOperator.value);
       console.log(result.value);
     }
