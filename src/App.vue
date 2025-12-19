@@ -3,43 +3,81 @@
   import ButtonsComponent from './components/ButtonsComponent.vue';
   import DisplayScreen from './components/DisplayScreen.vue';
 
-  const { ValueOne,
-          ValueTwo,
+  const { valueOne,
+          valueTwo,
           mathOperator,
           result,
           operate,
           clear } = useCalculator();
 
-  const handleButtonClick = (value) => {
+  const handleClear = (value) => {
     if (value === 'C') {
       clear();
-      return;
+      return true;
     }
-    
+    return false;
+  }
+
+  const handleOperand = (type, value) => {
+    if (type !== 'operand') return false;
+
     if (!mathOperator.value) {
-      ValueOne.value = ValueOne.value === null ? Number(value) : ValueOne.value * 10 + Number(value);
-      console.log(ValueOne.value);
+      valueOne.value =
+        valueOne.value === null
+          ? Number(value) 
+          : valueOne.value * 10 + Number(value);
     } else {
-      ValueTwo.value = ValueTwo.value === null ? Number(value) : ValueTwo.value * 10 + Number(value);
-      console.log(ValueTwo.value);
+      valueTwo.value =
+        valueTwo.value === null 
+          ? Number(value) 
+          : valueTwo.value * 10 + Number(value);
     }
+    return true;
+  }
 
+  const handleEquals = (value) => {
     if (value === '=') {
-      operate()
-      console.log(mathOperator.value);
-      console.log(result.value);
+      operate();
+      return true;
     }
+    return false;
+  }
 
-    if (['+', '-', '*', '/'].includes(value)) {
-      mathOperator.value = value;
+  const handleOperator = (type, value) => {
+    if (type !== 'operator') return false;
+
+    const operatorMap = {
+      '+': '+',
+      '−': '-',
+      '×': '*',
+      '÷': '/'
+    };
+    
+    if (operatorMap[value]) {
+      mathOperator.value = operatorMap[value];
+      return true;
     }
+    return false;
+  }
+
+  const handleButtonClick = (payload) => {
+    const { type, value } = payload;
+  
+  if (handleClear(value)) return;
+  if (handleOperand(type, value)) return;
+  if (handleEquals(value)) return;
+  if (handleOperator(type, value)) return;
   };
 
 </script>
 
 <template>
   <div>
-    <DisplayScreen :result="result" /> 
+    <DisplayScreen :result="result" 
+      :valueOne="valueOne" 
+      :valueTwo="valueTwo" 
+      :mathOperator="mathOperator"
+      /> 
 
     <ButtonsComponent @button-click="handleButtonClick"/>
   </div>

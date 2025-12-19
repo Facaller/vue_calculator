@@ -10,6 +10,10 @@ const props = defineProps({
         type: [Number],
         default: 0
     },
+    mathOperator: {
+        type: [String],
+        default: null
+    },
     result: {
         type: [Number, String],
         default: 0,
@@ -20,6 +24,9 @@ const props = defineProps({
 
 <template>
     <div class="display">
+        <p>{{ props.valueOne }}</p>
+        <p>{{ props.mathOperator }}</p>
+        <p>{{ props.valueTwo }}</p>
         <p>{{ props.result }}</p>
     </div>
 </template>

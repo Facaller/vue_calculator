@@ -2,34 +2,34 @@ import { ref } from 'vue'
 
 export function useCalculator() {
 
-    const ValueOne = ref(null);
-    const ValueTwo = ref(null);
+    const valueOne = ref(null);
+    const valueTwo = ref(null);
     const mathOperator = ref('');
     const result = ref(null);
 
     function add () {
-        return result.value = ValueOne.value + ValueTwo.value;
+        return result.value = valueOne.value + valueTwo.value;
     }
 
     function subtract () {
-        return result.value = ValueOne.value - ValueTwo.value;
+        return result.value = valueOne.value - valueTwo.value;
     }
 
     function multiply () {
-        return result.value = ValueOne.value * ValueTwo.value;
+        return result.value = valueOne.value * valueTwo.value;
     }
 
     function divide () {
-        if (ValueTwo.value === 0) {
+        if (valueTwo.value === 0) {
             result.value = 'Error';
         } else {
-            return result.value = ValueOne.value / ValueTwo.value;
+            return result.value = valueOne.value / valueTwo.value;
         }
     }
 
     function clear () {
-        ValueOne.value = null;
-        ValueTwo.value = null;
+        valueOne.value = null;
+        valueTwo.value = null;
         mathOperator.value = '';
         result.value = null;
     }
@@ -54,8 +54,8 @@ export function useCalculator() {
     }
 
     return {
-        ValueOne,
-        ValueTwo,
+        valueOne,
+        valueTwo,
         mathOperator,
         result,
         operate,
