@@ -8,7 +8,8 @@
           mathOperator,
           result,
           operate,
-          clear } = useCalculator();
+          clear }
+        = useCalculator();
 
   const handleClear = (value) => {
     if (value === 'C') {
