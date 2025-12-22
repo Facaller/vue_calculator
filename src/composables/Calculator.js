@@ -52,37 +52,25 @@ export function useCalculator() {
                 result.value = 0;
         }
     }
-    //start here
-    const setOperand = () => {
+    
+    const setOperand = (value) => {
     
         if (!mathOperator.value) {
         valueOne.value =
             valueOne.value === null
-            ? Number(value) 
+            ? value
             : valueOne.value * 10 + Number(value);
         } else {
         valueTwo.value =
             valueTwo.value === null 
-            ? Number(value) 
+            ? value
             : valueTwo.value * 10 + Number(value);
         }
         return true;
     }
     
-    const setOperator = () => {
-    
-        const operatorMap = {
-        '+': '+',
-        '−': '-',
-        '×': '*',
-        '÷': '/'
-        };
-        
-        if (operatorMap[value]) {
-        mathOperator.value = operatorMap[value];
-        return true;
-        }
-        return false;
+    const setOperator = (operator) => {
+        mathOperator.value = operator;
     }
 
     return {
@@ -91,6 +79,8 @@ export function useCalculator() {
         mathOperator,
         result,
         operate,
-        clear
+        clear,
+        setOperand,
+        setOperator
     };
 }

@@ -8,16 +8,22 @@
           mathOperator,
           result,
           operate,
-          clear }
+          clear,
+          setOperand,
+          setOperator }
         = useCalculator();
+
+  const operatorMap = {
+    '+': '+',
+    '−': '-',
+    '×': '*',
+    '÷': '/'
+  };
 
   const handleButtonClick = (payload) => {
     const { type, value } = payload;
   
-  if (handleClear(value)) return;
-  if (handleOperand(type, value)) return;
-  if (handleEquals(value)) return;
-  if (handleOperator(type, value)) return;
+    if (type === 'operand') setOperand;
   };
 
 </script>
