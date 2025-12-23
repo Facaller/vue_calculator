@@ -23,7 +23,21 @@
   const handleButtonClick = (payload) => {
     const { type, value } = payload;
   
-    if (type === 'operand') setOperand;
+    if (type === 'operand') {
+      setOperand(value);
+      return;
+    }
+    if (type === 'operator') {
+      if (value === '=') {
+        operate();
+        return;
+      } else if (value === 'C') {
+        clear();
+        return;
+      } else if (operatorMap[value]) {
+        setOperator(operatorMap[value]);
+      }
+    }
   };
 
 </script>
