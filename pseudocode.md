@@ -1,416 +1,90 @@
-1. Key idea you’re missing (very common beginner gap)
+Conceptual Approach:
+1. Track the Ongoing Result:
 
-“I thought I needed those functions in App so I could use the data from the composable”
+The first thing you'll need to do is ensure that the current result is always available to be used as an operand when the user clicks a new operator after an equals sign (=). After a calculation (e.g., 8 + 9), the result should not reset, but rather be available for further calculations.
 
-This is the important Vue concept:
+If the user clicks = and gets the result, the result becomes valueOne (or the first operand) for the next operation.
 
-When you call a composable, you get both the state and the functions that are allowed to change that state.
+If an operator is clicked after =, that result should be carried forward and used in the next operation.
 
-So:
+2. Handle Immediate Operator Clicks After =:
 
-The composable owns the rules
+Once the user clicks =, the result is displayed, but the next step is crucial: the user may click another operator directly. If they do, the result of the previous calculation (result) should be treated as the new valueOne (or first operand) for the next operation.
 
-The component just triggers actions
+This means the operator needs to either:
 
-Right now, your composable owns some rules (operate, clear), but your App component owns other rules (how operands are built, when operators are allowed, etc.). That’s why things feel tangled.
+Replace valueOne with the result of the previous calculation.
 
-2. What should live in the composable vs the App?
-Composable (useCalculator)
+Reset valueTwo and mathOperator as appropriate for the next operation.
 
-Should know:
+3. Resetting valueTwo When New Operation Begins:
 
-What a calculator is
+After clicking an operator, you'll need to clear valueTwo because this operand will be replaced by the next number the user inputs. valueTwo represents the second operand for the current operation, and once the user switches operators or presses =, this should be reset to null until the next number is input.
 
-What happens when:
+For example, if the user presses +, they input the next number, and valueTwo will start accumulating that new number. But if they press - right after =, valueTwo needs to be cleared to start fresh with the new second operand.
 
-a number is pressed
+4. Add a Flag or State to Indicate the Need to "Continue" a Calculation:
 
-an operator is pressed
+You'll want to keep track of whether the user is continuing a calculation after pressing = or just entering a new calculation. This can be achieved with a boolean flag (e.g., isContinuing).
 
-equals is pressed
+If isContinuing is true, the next operator should continue using the result from the previous operation as the first operand.
 
-clear is pressed
+If isContinuing is false, you can treat the next input as the start of a new calculation.
 
-In other words:
-👉 “Given an input, how does calculator state change?”
+This flag can be set to true when the user presses =, and it can be reset whenever they start a new calculation (i.e., when a number is first pressed after an operator or result).
 
-App component
+5. Flow When Pressing Operators After =:
 
-Should know:
+After =, the result should replace valueOne, and valueTwo should be cleared.
 
-That a button was clicked
+The mathOperator should be set to the new operator.
 
-What button was clicked
+The calculation should proceed with valueOne being the result of the previous operation, and valueTwo accumulating the new number(s).
 
-Nothing else
+For example:
 
-👉 “User clicked something → tell calculator about it”
+"8 + 9 = 17" → Now, if the user clicks - and then 1, you treat the result 17 as valueOne and perform 17 - 1.
 
-3. Stop thinking in terms of “handlers”, start thinking in terms of “actions”
+6. Flow When Operators Are Pressed Without =:
 
-Right now you have:
+If the user presses an operator immediately (without pressing =), you'll simply treat the existing valueOne and valueTwo as the first and second operands for the operation. You reset valueTwo and begin adding the new number into it, just like how a normal calculation starts.
 
-handleOperand
+7. Managing Edge Cases (e.g., Consecutive = or Operators)
 
-handleOperator
+You'll want to make sure your calculator behaves well if the user presses = multiple times or presses multiple operators consecutively:
 
-handleEquals
+Multiple = clicks: After the first =, you should simply return the same result unless the user starts a new operation (via another operator click).
 
-handleClear
+Consecutive operators: You might want to ignore a second operator unless the user has first entered a number. Alternatively, you could reset the operation and treat it like a fresh calculation.
 
-Those are calculator actions, not UI concerns.
+Step-by-Step Workflow Concept:
 
-So instead of App saying:
+User presses operand(s): The operand is accumulated (e.g., 8, 9, etc.).
 
-“If this, then change valueOne…”
+User presses an operator: Set mathOperator and store the operand in valueOne (or valueTwo if the operator comes after the first operation).
 
-You want:
+User presses =: Perform the operation and display the result. Set isContinuing = true to allow continuing calculations.
 
-“Calculator, a number was pressed: 7”
+User presses another operator after =:
 
-4. How the composable exposes logic (this is the key shift)
+Use the result of the last operation as valueOne.
 
-Your composable already does this partially:
+Clear valueTwo (since it's ready to accumulate a new operand).
 
-return {
-  valueOne,
-  valueTwo,
-  mathOperator,
-  result,
-  operate,
-  clear
-}
+Set the new operator in mathOperator.
 
+User continues entering operands: valueTwo starts accumulating the new number.
 
-You can extend this idea.
+User clicks = again: Final result is computed and displayed, and valueOne and valueTwo are reset for the next operation.
 
-Instead of App mutating:
+Conclusion:
 
-valueOne.value
+To sum it up, you're essentially building logic that:
 
-valueTwo.value
+Uses the result from the last operation as the starting point for the next operation if the user clicks an operator after =.
 
-mathOperator.value
+Resets valueTwo when a new operator is clicked, allowing the user to continue entering numbers for the next operand.
 
-The composable exposes intent-based functions, for example (conceptually):
+Makes sure to handle edge cases like consecutive = presses or consecutive operators.
 
-function inputNumber(value) { ... }
-function inputOperator(op) { ... }
-function inputEquals() { ... }
-
-
-You are not “losing access” to the data — the composable already has it.
-App never needed direct mutation in the first place.
-
-5. What App looks like after this shift (conceptually)
-
-Your App’s job becomes very small:
-
-Receive button click payload
-
-Decide which calculator action to call
-
-That’s it
-
-Instead of:
-
-if (handleOperand(type, value)) return;
-if (handleEquals(value)) return;
-
-
-It becomes closer to:
-
-if (type === 'operand') calculator.inputNumber(value)
-if (type === 'operator') calculator.inputOperator(value)
-
-
-No math.
-No state decisions.
-No branching based on current calculator state.
-
-6. “But how does the composable know what to do?”
-
-Because it already has the state:
-
-valueOne
-
-valueTwo
-
-mathOperator
-
-result
-
-So logic like this (illustrative only):
-
-if (!mathOperator.value) {
-  // build valueOne
-} else {
-  // build valueTwo
-}
-
-
-belongs inside the composable, not App.
-
-This mirrors your Odin Project lesson perfectly:
-
-“Make it work in the console first”
-
-Your composable is the console version of your calculator.
-
-7. Why this improves scalability immediately
-
-Once logic is in the composable:
-
-You can:
-
-Add keyboard input later
-
-Replace buttons entirely
-
-Write tests for calculator logic
-
-Without touching:
-
-DisplayScreen
-
-ButtonsComponent
-
-App layout
-
-That’s real separation of concerns.
-
-8. About “relying on specific elements”
-
-You’re right to be uneasy about this.
-
-Right now:
-
-"=", "C", "+" are being interpreted in App
-
-App has to know calculator rules
-
-After refactor:
-
-App just forwards button intent
-
-Calculator decides what "=" or "C" means
-
-This removes UI coupling from logic.
-
-9. Final mental checklist (use this going forward)
-
-When writing Vue apps, ask yourself:
-
-❌ “Where do I need access to this state?”
-
-✅ “Who should be allowed to change this state?”
-
-If the answer is “the calculator”, then it belongs in the composable.
-
-You’re doing very well for a beginner
-
-The fact that you’re:
-
-Thinking about DRY
-
-Thinking about scalability
-
-Feeling friction in the design
-
-…means your instincts are already solid.
-
-If you want, next we can:
-
-Refactor ButtonsComponent to be data-driven
-
-Talk about finite state thinking for calculators
-
-Or discuss how Vue’s reactivity changes design vs vanilla JS
-
-Just tell me 👍
-
-
-****************************
-COMPOSABLE LOGIC
-
-Great questions. You’re circling the exact “aha” moment most people hit when composables finally make sense. Let’s slow it down and be very precise.
-
-1. “Should I just move the logic functions into the composable unchanged?”
-
-Short answer:
-Not unchanged — conceptually the same, structurally better.
-
-Why not unchanged?
-
-Your current functions in App:
-
-Depend on UI-level details (type, "=", "C")
-
-Are split up in a way that only makes sense because App is coordinating them
-
-When you move logic into the composable, you want to:
-
-Remove UI concepts
-
-Keep only calculator concepts
-
-Think in terms of intent, not events
-
-Right now App says:
-
-“A button was clicked, let me figure out what that means”
-
-The composable should say:
-
-“A number was entered”
-“An operator was chosen”
-“A calculation was requested”
-
-So:
-
-The rules stay
-
-The shape changes
-
-This is why copying the functions “as-is” will feel awkward — that’s a signal you’re doing the right refactor.
-
-2. What logic belongs in the composable?
-
-Ask this question for each function:
-
-“Would a calculator still need this logic if it had no UI at all?”
-
-If the answer is yes, it belongs in the composable.
-
-That includes:
-
-Building multi-digit numbers
-
-Deciding whether to update valueOne or valueTwo
-
-Mapping operators
-
-Running the operation
-
-Clearing state
-
-It does not include:
-
-Button click events
-
-DOM concerns
-
-Emitted payload shapes
-
-3. “Will I still need this line in App?”
-const {
-  valueOne,
-  valueTwo,
-  mathOperator,
-  result,
-  operate,
-  clear
-} = useCalculator();
-
-
-Yes — absolutely.
-But what you destructure will change.
-
-Why it’s still necessary
-
-This line does two crucial things:
-
-Creates the calculator instance
-
-Gives App access to:
-
-Reactive state (for display)
-
-Public actions (to respond to UI)
-
-Without calling useCalculator():
-
-There is no calculator
-
-There is no state to display
-
-There is no logic to run
-
-So this line is not optional — it’s foundational.
-
-4. What does change about that destructuring?
-
-Right now App is pulling:
-
-Raw state
-
-Low-level logic (operate, clear)
-
-After refactor, App should pull:
-
-Raw state (still needed for display)
-
-High-level actions, not internal steps
-
-Conceptually, it becomes more like:
-
-const {
-  valueOne,
-  valueTwo,
-  mathOperator,
-  result,
-  inputNumber,
-  inputOperator,
-  inputEquals,
-  clear
-} = useCalculator();
-
-
-Notice what’s missing:
-
-App no longer needs to know how operating works
-
-App never mutates valueOne.value directly
-
-App just says:
-
-“Calculator, do the thing”
-
-5. Important reassurance: “Am I losing flexibility?”
-
-No — you’re gaining it.
-
-Because:
-
-You can swap ButtonsComponent for keyboard input
-
-You can call the same calculator from tests
-
-You can reuse the composable in another UI
-
-All without touching the logic.
-
-6. A very useful litmus test
-
-If you ever see this in a component:
-
-someRef.value = ...
-
-
-Ask yourself:
-
-“Is this UI state, or domain logic?”
-
-UI state → component
-
-Domain logic → composable
-
-In your case, calculator values are domain logic.
-
-7. Final answers, clearly
-
-Q: Should I move the functions unchanged?
-➡️ No. Move the rules, but reshape them to reflect calculator intent.
-
-Q: Will useCalculator() still be needed?
-➡️ Yes. Always. That’s how App gets both the state and the allowed ways to change it.
+By introducing a small flag like isContinuing and managing your operand values (valueOne, valueTwo) appropriately, you can ensure a smooth experience for users who want to chain operations together.

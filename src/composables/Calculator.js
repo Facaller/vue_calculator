@@ -54,17 +54,18 @@ export function useCalculator() {
     }
     
     const setOperand = (value) => {
-    
+        const numericValue = Number(value);
+
         if (!mathOperator.value) {
         valueOne.value =
             valueOne.value === null
-            ? value
-            : valueOne.value * 10 + Number(value);
+            ? numericValue
+            : valueOne.value * 10 + numericValue;
         } else {
         valueTwo.value =
             valueTwo.value === null 
-            ? value
-            : valueTwo.value * 10 + Number(value);
+            ? numericValue
+            : valueTwo.value * 10 + numericValue;
         }
         return true;
     }
