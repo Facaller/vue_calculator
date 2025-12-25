@@ -7,6 +7,8 @@ export function useCalculator() {
     const mathOperator = ref('');
     const result = ref(null);
 
+    let isContinuing = false;
+
     function add () {
         return result.value = valueOne.value + valueTwo.value;
     }
@@ -52,6 +54,18 @@ export function useCalculator() {
                 result.value = 0;
         }
     }
+//rofl nice logic btw. Ape
+    function continueOperation () {
+        if (mathOperator.value) {
+            isContinuing = true;
+        }
+
+        if (isContinuing) {
+            valueOne.value = result.value;
+            valueTwo.value = null;
+        }
+        isContinuing = false;
+    }
     
     const setOperand = (value) => {
         const numericValue = Number(value);
@@ -81,6 +95,7 @@ export function useCalculator() {
         result,
         operate,
         clear,
+        continueOperation,
         setOperand,
         setOperator
     };
