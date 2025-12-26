@@ -54,17 +54,12 @@ export function useCalculator() {
                 result.value = 0;
         }
     }
-//rofl nice logic btw. Ape
-    function continueOperation () {
-        if (mathOperator.value) {
-            isContinuing = true;
-        }
 
+    function continueOperation () {
         if (isContinuing) {
             valueOne.value = result.value;
             valueTwo.value = null;
         }
-        isContinuing = false;
     }
     
     const setOperand = (value) => {
@@ -85,6 +80,10 @@ export function useCalculator() {
     }
     
     const setOperator = (operator) => {
+        if (mathOperator.value && result.value) {
+            isContinuing = true;
+            continueOperation();
+        }
         mathOperator.value = operator;
     }
 
