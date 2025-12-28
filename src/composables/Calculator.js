@@ -56,10 +56,16 @@ export function useCalculator() {
     }
 
     function continueOperation () {
+        isContinuing = true;
         if (isContinuing) {
             valueOne.value = result.value;
             valueTwo.value = null;
         }
+        if (mathOperator.value && valueTwo.value) {
+            operate()
+            
+        }
+        isContinuing = false;
     }
     
     const setOperand = (value) => {
@@ -80,10 +86,6 @@ export function useCalculator() {
     }
     
     const setOperator = (operator) => {
-        if (mathOperator.value && result.value) {
-            isContinuing = true;
-            continueOperation();
-        }
         mathOperator.value = operator;
     }
 
