@@ -56,14 +56,13 @@ export function useCalculator() {
     }
 
     function continueOperation () {
-        isContinuing = true;
+        if (mathOperator.value !== null) {
+            isContinuing = true;
+        }
         if (isContinuing) {
+            operate();
             valueOne.value = result.value;
             valueTwo.value = null;
-        }
-        if (mathOperator.value && valueTwo.value) {
-            operate()
-            
         }
         isContinuing = false;
     }
@@ -86,7 +85,9 @@ export function useCalculator() {
     }
     
     const setOperator = (operator) => {
-        mathOperator.value = operator;
+        if (valueOne.value !== null) {
+            mathOperator.value = operator;
+        }
     }
 
     return {
