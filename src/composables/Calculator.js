@@ -85,9 +85,8 @@ export function useCalculator() {
     }
     
     const setOperator = (operator) => {
-        if (valueOne.value !== null) {
-            mathOperator.value = operator;
-        }
+        if (mathOperator.value) return;
+        mathOperator.value = operator;
     }
 
     return {

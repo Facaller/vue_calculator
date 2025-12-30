@@ -1,174 +1,227 @@
-Conceptual Approach (Beginner-Friendly, JS/Vue-Oriented)
-1. Track the Ongoing Result
+Here’s a complete refactor of your Calculator composable:
 
-The first thing you'll need to do is ensure that the current result is always available to be used as an operand when the user clicks a new operator after an equals sign (=).
+Key Changes:
 
-After a calculation (for example, 8 + 9), the result should not reset. Instead, it should remain available for further calculations.
+Managing the continuing operation logic:
 
-Conceptually:
+After pressing an operator, if we have a result, it should be used as the valueOne for the next operation.
 
-8 + 9 = 17
+We need to prevent resetting valueOne after an operation, and only reset valueTwo.
 
+Handling operator changes:
 
-If the user clicks =, the result becomes valueOne (the first operand) for the next operation.
+The operator should stay the same unless the user explicitly presses =.
 
-valueOne = result
+Once the user presses an operator (after =, for example), we need to ensure the operation continues on the result.
 
+Updated Calculator Composable
+import { ref } from 'vue';
 
-If an operator is clicked after =, that result should be carried forward and used in the next operation.
+export function useCalculator() {
+  const valueOne = ref(null);
+  const valueTwo = ref(null);
+  const mathOperator = ref('');
+  const result = ref(null);
 
-2. Handle Immediate Operator Clicks After =
+  // Function to perform arithmetic operations
+  function add() {
+    result.value = valueOne.value + valueTwo.value;
+  }
 
-Once the user clicks =, the result is displayed. The important part is what happens next.
+  function subtract() {
+    result.value = valueOne.value - valueTwo.value;
+  }
 
-If the user immediately clicks another operator, the result of the previous calculation should be treated as the new first operand.
+  function multiply() {
+    result.value = valueOne.value * valueTwo.value;
+  }
 
-Conceptually:
+  function divide() {
+    if (valueTwo.value === 0) {
+      result.value = 'Error';
+    } else {
+      result.value = valueOne.value / valueTwo.value;
+    }
+  }
 
-8 + 9 = 17
-17 - ?
+  // Clear all state
+  function clear() {
+    valueOne.value = null;
+    valueTwo.value = null;
+    mathOperator.value = '';
+    result.value = null;
+  }
 
+  // Perform operation based on current operator
+  function operate() {
+    switch (mathOperator.value) {
+      case '+':
+        add();
+        break;
+      case '-':
+        subtract();
+        break;
+      case '*':
+        multiply();
+        break;
+      case '/':
+        divide();
+        break;
+      default:
+        result.value = 0;
+    }
+  }
 
-This means the operator logic should:
+  // This function should be called to continue operation after pressing an operator
+  function continueOperation() {
+    // Only do something if there's already a result to continue from
+    if (result.value !== null) {
+      valueOne.value = result.value; // use the result as valueOne for next operation
+      valueTwo.value = null;          // reset valueTwo for the next operand
+      result.value = null;            // reset result as we're in the middle of a new operation
+    }
+  }
 
-Replace valueOne with the previous result
+  // Set the operand based on whether we're in the first or second operand stage
+  const setOperand = (value) => {
+    const numericValue = Number(value);
 
-Prepare for a new second operand
+    if (!mathOperator.value) { // First operand
+      valueOne.value =
+        valueOne.value === null
+          ? numericValue
+          : valueOne.value * 10 + numericValue;
+    } else { // Second operand
+      valueTwo.value =
+        valueTwo.value === null
+          ? numericValue
+          : valueTwo.value * 10 + numericValue;
+    }
+  };
 
-valueOne = result
-valueTwo = null
-mathOperator = newOperator
+  // Set the operator, but only allow the first operator to be set
+  const setOperator = (operator) => {
+    if (mathOperator.value) return; // If an operator is already set, prevent overriding
 
-3. Resetting valueTwo When a New Operation Begins
+    mathOperator.value = operator;
+  };
 
-valueTwo represents the second operand in a calculation.
-
-When a new operator is clicked, valueTwo must be cleared so the next number the user types starts fresh.
-
-Example flow:
-
-8 + 9 = 17
-17 - 1
-
-
-After clicking -, before typing 1:
-
-valueTwo = null
-
-
-As the user types numbers, valueTwo starts accumulating again:
-
-valueTwo = "1"
-
-4. Add a Flag to Indicate Continuing a Calculation
-
-To keep your logic clean, it helps to track whether the user is continuing a calculation or starting a new one.
-
-This can be done with a boolean flag, such as:
-
-isContinuing = false
-
-
-Behavior:
-
-Set isContinuing = true when the user presses =
-
-Use this flag to decide whether to reuse the previous result
-
-Conceptually:
-
-if (isContinuing) {
-  valueOne = result
+  return {
+    valueOne,
+    valueTwo,
+    mathOperator,
+    result,
+    operate,
+    clear,
+    continueOperation,
+    setOperand,
+    setOperator,
+  };
 }
 
+Updated App Component
 
-When the user starts typing a number again, you can reset it:
+Now, let’s make sure the App component uses continueOperation correctly to allow for continuous operations.
 
-isContinuing = false
+<script setup>
+  import { useCalculator } from './composables/Calculator';
+  import ButtonsComponent from './components/ButtonsComponent.vue';
+  import DisplayScreen from './components/DisplayScreen.vue';
 
-5. Flow When Pressing Operators After =
+  const {
+    valueOne,
+    valueTwo,
+    mathOperator,
+    result,
+    operate,
+    clear,
+    setOperand,
+    setOperator,
+    continueOperation
+  } = useCalculator();
 
-After = is pressed:
+  const operatorMap = {
+    '+': '+',
+    '−': '-',
+    '×': '*',
+    '÷': '/'
+  };
 
-The result replaces valueOne
+  const handleButtonClick = (payload) => {
+    const { type, value } = payload;
 
-valueTwo is cleared
+    if (type === 'operand') {
+      // Set operand (either first or second)
+      setOperand(value);
+      return;
+    }
 
-A new operator is stored
+    if (type === 'operator') {
+      if (value === '=') {
+        // Perform the operation when '=' is pressed
+        operate();
+        return;
+      } else if (value === 'C') {
+        // Clear the calculator when 'C' is pressed
+        clear();
+        return;
+      } else if (operatorMap[value]) {
+        // For any operator, continue the operation
+        if (result.value !== null) {
+          // If result exists, continue the operation
+          continueOperation();
+        }
+        // Set the new operator
+        setOperator(operatorMap[value]);
+      }
+    }
+  };
 
-valueOne = result
-valueTwo = null
-mathOperator = operatorClicked
+</script>
 
+<template>
+  <div>
+    <DisplayScreen :result="result" 
+      :valueOne="valueOne" 
+      :valueTwo="valueTwo" 
+      :mathOperator="mathOperator" /> 
 
-Example:
+    <ButtonsComponent @button-click="handleButtonClick"/>
+  </div>
+</template>
 
-8 + 9 = 17
-17 - 1 = 16
+<style scoped>
+/* Add styles as needed */
+</style>
 
+Key Changes Explained:
 
-Here, 17 is reused automatically as the starting point.
+continueOperation Function:
 
-6. Flow When Operators Are Pressed Without =
+This is crucial for making sure that once you have a result, you can continue performing operations on it. It uses the current result as the new valueOne and clears out valueTwo to allow for entering the next operand.
 
-If the user presses an operator without pressing = first, the calculator behaves normally.
+The setOperand Function:
 
-Example:
+This function is responsible for setting either valueOne or valueTwo based on the current stage of input (first operand or second operand).
 
-8 + 9 - 3
+It handles building multi-digit numbers as the user presses additional digits.
 
+Handling Operator Presses:
 
-Conceptually:
+When an operator is pressed (+, -, *, /), the calculator checks if there's a result already. If there is, it will call continueOperation() to use that result as the new first operand (valueOne).
 
-Use the existing valueOne and valueTwo
+The operator is then stored in mathOperator for use in the next operation.
 
-Perform the pending operation
+Resetting the State After =:
 
-Store the result back into valueOne
+Once = is pressed, the result of the current operation is displayed. We don't clear the mathOperator or valueOne until after the operation is finished, ensuring that the user can continue from the result.
 
-Reset valueTwo for the next number
+With these changes, you should be able to do operations like:
 
-valueOne = compute(valueOne, valueTwo, mathOperator)
-valueTwo = null
-mathOperator = newOperator
+3 * 3 → result is 9
 
-7. Managing Edge Cases
-Multiple = Clicks
+Then press - 7 → result is 2
 
-If the user presses = multiple times in a row:
+Then press + 8 → result is 10
 
-8 + 9 = 17 = = =
-
-
-The calculator should keep showing the same result unless a new operator or number is entered.
-
-Conceptually:
-
-if (equalsPressedAgain) {
-  return result
-}
-
-Consecutive Operators
-
-If the user presses multiple operators in a row:
-
-8 + - * 9
-
-
-You have a couple of safe options:
-
-Ignore the extra operators
-
-Replace the previous operator with the new one
-
-mathOperator = lastOperatorClicked
-
-Step-by-Step Workflow Concept
-1. User presses numbers → accumulate operand
-2. User presses operator → store operator and operand
-3. User presses = → compute and show result
-4. User presses operator again →
-   - reuse result as valueOne
-   - clear valueTwo
-5. User types next number → valueTwo builds
-6. User presses = → compute again
+Each time you perform an operation after the result, it will continue seamlessly!
