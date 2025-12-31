@@ -7,8 +7,6 @@ export function useCalculator() {
     const mathOperator = ref('');
     const result = ref(null);
 
-    let isContinuing = false;
-
     function add () {
         return result.value = valueOne.value + valueTwo.value;
     }
@@ -56,15 +54,11 @@ export function useCalculator() {
     }
 
     function continueOperation () {
-        if (mathOperator.value !== null) {
-            isContinuing = true;
-        }
-        if (isContinuing) {
-            operate();
+        if (result.value !== null) {
             valueOne.value = result.value;
             valueTwo.value = null;
+            result.value = null;
         }
-        isContinuing = false;
     }
     
     const setOperand = (value) => {

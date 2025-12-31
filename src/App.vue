@@ -9,7 +9,7 @@
           result,
           operate,
           clear,
-          
+          continueOperation,
           setOperand,
           setOperator }
         = useCalculator();
@@ -36,6 +36,9 @@
         clear();
         return;
       } else if (operatorMap[value]) {
+        if (result.value !== null) {
+          continueOperation();
+        }
         setOperator(operatorMap[value]);
       }
     }
