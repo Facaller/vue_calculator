@@ -54,6 +54,9 @@ export function useCalculator() {
     }
 
     function continueOperation () {
+        if (valueOne.value !== null && valueTwo.value !== null) {
+            operate();
+        }
         if (result.value !== null) {
             valueOne.value = result.value;
             valueTwo.value = null;
@@ -79,7 +82,7 @@ export function useCalculator() {
     }
     
     const setOperator = (operator) => {
-        if (mathOperator.value) return;
+        if (valueOne.value === null) return;
         mathOperator.value = operator;
     }
 

@@ -36,9 +36,7 @@
         clear();
         return;
       } else if (operatorMap[value]) {
-        if (result.value !== null) {
-          continueOperation();
-        }
+        continueOperation();
         setOperator(operatorMap[value]);
       }
     }
@@ -59,5 +57,18 @@
 </template>
 
 <style scoped>
+  @font-face {
+    font-family: 'mojang';
+    src: 
+      url(./assets/fonts/mojang-regular-webfont.woff2),
+      url(./assets/fonts/mojang-regular-webfont.woff);
+      font-weight: normal;
+      font-style: normal;
+  }
 
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 </style>
