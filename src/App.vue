@@ -45,7 +45,7 @@
 </script>
 
 <template>
-  <div>
+  <div class="container">
     <DisplayScreen :result="result" 
       :valueOne="valueOne" 
       :valueTwo="valueTwo" 
@@ -66,9 +66,12 @@
       font-style: normal;
   }
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  .container {
+    display: grid;
+    grid-template-rows: auto minmax(100px, 1fr);
+    height: 100%;
+    width: 100%;
+    justify-items: center;
+    align-items: center;
   }
 </style>
