@@ -46,13 +46,14 @@
 
 <template>
   <div class="container">
-    <DisplayScreen :result="result" 
-      :valueOne="valueOne" 
-      :valueTwo="valueTwo" 
-      :mathOperator="mathOperator"
-      /> 
-
-    <ButtonsComponent @button-click="handleButtonClick"/>
+    <div class="calculator">
+      <DisplayScreen :result="result"
+        :valueOne="valueOne"
+        :valueTwo="valueTwo"
+        :mathOperator="mathOperator"
+        />
+      <ButtonsComponent @button-click="handleButtonClick"/>
+    </div>
   </div>
 </template>
 
@@ -68,10 +69,16 @@
 
   .container {
     display: grid;
-    grid-template-rows: auto minmax(100px, 1fr);
     height: 100%;
     width: 100%;
     justify-items: center;
-    align-items: center;
+    align-content: center;
+  }
+
+  .calculator {
+    display: grid;
+    grid-template-rows: 1fr 4fr;
+    border: 4px solid black;
+    padding: 1rem;
   }
 </style>
