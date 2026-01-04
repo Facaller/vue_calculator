@@ -11,37 +11,50 @@ const operatorClick = (value) => {
 </script>
 
 <template>
-    <div>
-        <div>
-            <button class="button-box" @click="numberClick('7')">7</button>
-            <button class="button-box" @click="numberClick('8')">8</button>
-            <button class="button-box" @click="numberClick('9')">9</button>
-            <button class="button-box" @click="operatorClick('÷')">÷</button>
+    <div class="button-box">
+        <div class="button-box-rows">
+            <button class="operands" @click="numberClick('7')">7</button>
+            <button class="operands" @click="numberClick('8')">8</button>
+            <button class="operands" @click="numberClick('9')">9</button>
+            <button class="operators" @click="operatorClick('÷')">÷</button>
         </div>
-        <div>
-            <button class="button-box" @click="numberClick('4')">4</button>
-            <button class="button-box" @click="numberClick('5')">5</button>
-            <button class="button-box" @click="numberClick('6')">6</button>
-            <button class="button-box" @click="operatorClick('×')">×</button>
+        <div class="button-box-rows">
+            <button class="operands" @click="numberClick('4')">4</button>
+            <button class="operands" @click="numberClick('5')">5</button>
+            <button class="operands" @click="numberClick('6')">6</button>
+            <button class="operators" @click="operatorClick('×')">×</button>
         </div>
-        <div>
-            <button class="button-box" @click="numberClick('1')">1</button>
-            <button class="button-box" @click="numberClick('2')">2</button>
-            <button class="button-box" @click="numberClick('3')">3</button>
-            <button class="button-box" @click="operatorClick('−')">−</button>
+        <div class="button-box-rows">
+            <button class="operands" @click="numberClick('1')">1</button>
+            <button class="operands" @click="numberClick('2')">2</button>
+            <button class="operands" @click="numberClick('3')">3</button>
+            <button class="operators" @click="operatorClick('−')">−</button>
         </div>
-        <div>
-            <button class="button-box" @click="operatorClick('=')">=</button>
-            <button class="button-box" @click="numberClick('0')">0</button>
-            <button class="button-box" @click="operatorClick('C')">C</button>
-            <button class="button-box" @click="operatorClick('+')">+</button>
+        <div class="button-box-rows">
+            <button class="operators" @click="operatorClick('=')">=</button>
+            <button class="operands" @click="numberClick('0')">0</button>
+            <button class="operators" @click="operatorClick('C')">C</button>
+            <button class="operators" @click="operatorClick('+')">+</button>
         </div>
     </div>
 </template>
 
 <style scoped>
     .button-box {
-        padding: 32px 48px;
+        
+    }
+
+    .button-box-rows {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .operators,
+    .operands {
+        padding: 24px 48px;
+        border: 1px solid gray;
+        border-radius: 6px;
+        margin: .3rem;
         font: 30px 'mojang';
     }
 </style>

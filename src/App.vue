@@ -78,7 +78,8 @@
   .calculator {
     display: grid;
     grid-template-rows: 1fr 4fr;
-    border: 4px solid black;
-    padding: 1rem;
+    border: 1px solid black;
+    padding: .2rem;
+    box-shadow: 5px 5px 12px 2px grey;
   }
 </style>
