@@ -1,5 +1,5 @@
 <script setup>
-import {defineProps} from 'vue';
+import {defineProps, ref} from 'vue';
 
 const props = defineProps({
     valueOne: {
@@ -20,19 +20,29 @@ const props = defineProps({
     },
 });
 
+const currentDisplay = ref('showValueOne')
 </script>
 
 <template>
     <div class="display">
-        <p>{{ props.valueOne }}</p>
-        <p>{{ props.mathOperator }}</p>
-        <p>{{ props.valueTwo }}</p>
-        <p>{{ props.result }}</p>
+        <p v-if="currentDisplay === 'showValueOne'">{{ props.valueOne }}</p>
+        <p v-if="currentDisplay === 'showOperator'">{{ props.mathOperator }}</p>
+        <p v-if="currentDisplay === 'showValueTwo'">{{ props.valueTwo }}</p>
+        <p v-if="currentDisplay === 'showResult'">{{ props.result }}</p>
     </div>
 </template>
 
 <style scoped>
+
+    p {
+        padding: 0px 1px 10px 0px;
+    }
+
     .display {
-        border: 5px solid red;
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        padding: 2px;
+        font: 32px 'mojang';
     }
 </style>
