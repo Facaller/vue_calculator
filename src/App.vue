@@ -3,15 +3,13 @@
   import ButtonsComponent from './components/ButtonsComponent.vue';
   import DisplayScreen from './components/DisplayScreen.vue';
 
-  const { valueOne,
-          valueTwo,
-          mathOperator,
-          result,
+  const { currentPhase,
           operate,
           clear,
           continueOperation,
           setOperand,
-          setOperator }
+          setOperator,
+          getDisplayValue }
         = useCalculator();
 
   const operatorMap = {
@@ -20,24 +18,34 @@
     '×': '*',
     '÷': '/'
   };
-
+//issue is here
   const handleButtonClick = (payload) => {
     const { type, value } = payload;
   
     if (type === 'operand') {
-      setOperand(value);
+      if (currentPhase.value === 'enteringFirst') {
+        setOperand(value);
+        currentPhase.value = 'enteringOperator'
+      } else if (currentPhase.value === 'enteringOperator') {
+        setOperand(value);
+        currentPhase.value = 'enteringSecond'
+      } else if (currentPhase.value === 'enteringSecond') {
+        setOperand(value);
+      }
       return;
     }
+
     if (type === 'operator') {
       if (value === '=') {
         operate();
-        return;
+        currentPhase.value = 'showingResult';
       } else if (value === 'C') {
         clear();
-        return;
+        currentPhase.value = 'enteringFirst';
       } else if (operatorMap[value]) {
         continueOperation();
         setOperator(operatorMap[value]);
+        currentPhase.value = 'enteringSecond';
       }
     }
   };
@@ -47,11 +55,7 @@
 <template>
   <div class="container">
     <div class="calculator">
-      <DisplayScreen :result="result"
-        :valueOne="valueOne"
-        :valueTwo="valueTwo"
-        :mathOperator="mathOperator"
-        />
+      <DisplayScreen :displayValue="getDisplayValue()" />
       <ButtonsComponent @button-click="handleButtonClick"/>
     </div>
   </div>

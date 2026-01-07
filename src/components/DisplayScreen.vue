@@ -1,34 +1,17 @@
 <script setup>
-import {defineProps, ref} from 'vue';
+import {defineProps} from 'vue';
 
 const props = defineProps({
-    valueOne: {
-        type: [Number],
-        default: 0
-    },
-    valueTwo: {
-        type: [Number],
-        default: 0
-    },
-    mathOperator: {
-        type: [String],
-        default: null
-    },
-    result: {
-        type: [Number, String],
-        default: 0,
-    },
+    displayValue: {
+        type: [String, Number],
+        default: ''
+    }
 });
-
-const currentDisplay = ref('showValueOne')
 </script>
 
 <template>
     <div class="display">
-        <p v-if="currentDisplay === 'showValueOne'">{{ props.valueOne }}</p>
-        <p v-if="currentDisplay === 'showOperator'">{{ props.mathOperator }}</p>
-        <p v-if="currentDisplay === 'showValueTwo'">{{ props.valueTwo }}</p>
-        <p v-if="currentDisplay === 'showResult'">{{ props.result }}</p>
+        <p>{{ props.displayValue }}</p>
     </div>
 </template>
 
