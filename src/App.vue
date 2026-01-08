@@ -26,9 +26,11 @@
       if (currentPhase.value === 'enteringFirst') {
         setOperand(value);
         currentPhase.value = 'enteringOperator'
+        console.log(currentPhase.value)
       } else if (currentPhase.value === 'enteringOperator') {
         setOperand(value);
         currentPhase.value = 'enteringSecond'
+        console.log(currentPhase.value)
       } else if (currentPhase.value === 'enteringSecond') {
         setOperand(value);
       }
@@ -39,13 +41,16 @@
       if (value === '=') {
         operate();
         currentPhase.value = 'showingResult';
+        console.log(currentPhase.value)
       } else if (value === 'C') {
         clear();
         currentPhase.value = 'enteringFirst';
+        console.log(currentPhase.value)
       } else if (operatorMap[value]) {
         continueOperation();
         setOperator(operatorMap[value]);
         currentPhase.value = 'enteringSecond';
+        console.log(currentPhase.value)
       }
     }
   };

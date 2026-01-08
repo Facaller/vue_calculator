@@ -4,7 +4,7 @@ export function useCalculator() {
 
     const valueOne = ref(null);
     const valueTwo = ref(null);
-    const mathOperator = ref('');
+    const mathOperator = ref(null);
     const result = ref(null);
     const currentPhase = ref('enteringFirst');
 
@@ -31,7 +31,7 @@ export function useCalculator() {
     function clear () {
         valueOne.value = null;
         valueTwo.value = null;
-        mathOperator.value = '';
+        mathOperator.value = null;
         result.value = null;
     }
 
@@ -90,11 +90,11 @@ export function useCalculator() {
     const getDisplayValue = () => {
         switch (currentPhase.value) {
             case 'enteringFirst':
-                return valueOne.value;
+                return valueOne.value !== null ? valueOne.value : '';
             case 'enteringOperator':
                 return mathOperator.value;
             case 'enteringSecond':
-                return valueTwo.value;
+                return valueTwo.value !== null ? valueTwo.value : '';
             case 'showingResult':
                 return result.value;
             default:
