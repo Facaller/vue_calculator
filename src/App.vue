@@ -18,7 +18,7 @@
     '×': '*',
     '÷': '/'
   };
-//issue is here
+//issue is here ffs
   const handleButtonClick = (payload) => {
     const { type, value } = payload;
   
