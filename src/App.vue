@@ -25,7 +25,6 @@
     if (type === 'operand') {
       if (currentPhase.value === 'enteringFirst') {
         setOperand(value);
-        currentPhase.value = 'enteringOperator'
         console.log(currentPhase.value)
       } else if (currentPhase.value === 'enteringOperator') {
         setOperand(value);
@@ -38,6 +37,7 @@
     }
 
     if (type === 'operator') {
+      
       if (value === '=') {
         operate();
         currentPhase.value = 'showingResult';
@@ -47,9 +47,9 @@
         currentPhase.value = 'enteringFirst';
         console.log(currentPhase.value)
       } else if (operatorMap[value]) {
+        currentPhase.value = 'enteringOperator'
         continueOperation();
         setOperator(operatorMap[value]);
-        currentPhase.value = 'enteringSecond';
         console.log(currentPhase.value)
       }
     }
