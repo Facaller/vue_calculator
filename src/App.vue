@@ -85,3 +85,36 @@
     box-shadow: 5px 5px 12px 2px grey;
   }
 </style>
+
+<!-- const handleButtonClick = ({ type, value }) => {
+  if (type === 'operand') {
+    setOperand(value);
+
+    if (currentPhase.value === 'enteringFirst') {
+      currentPhase.value = 'enteringFirst';
+    } else if (currentPhase.value === 'enteringOperator') {
+      currentPhase.value = 'enteringSecond';
+    }
+
+    return;
+  }
+
+  if (type === 'operator') {
+    if (value === '=') {
+      operate();
+      currentPhase.value = 'showingResult';
+      return;
+    }
+
+    if (value === 'C') {
+      clear();
+      currentPhase.value = 'enteringFirst';
+      return;
+    }
+
+    if (operatorMap[value]) {
+      setOperator(operatorMap[value]);
+      currentPhase.value = 'enteringOperator';
+    }
+  }
+}; -->
