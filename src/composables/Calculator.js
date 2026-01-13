@@ -112,10 +112,8 @@ export function useCalculator() {
     };
 
     return {
-        currentPhase,
         operate,
         clear,
-        applyAppendingOperation,
         setOperand,
         setOperator,
         getDisplayValue

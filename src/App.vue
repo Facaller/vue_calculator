@@ -3,10 +3,8 @@
   import ButtonsComponent from './components/ButtonsComponent.vue';
   import DisplayScreen from './components/DisplayScreen.vue';
 
-  const { currentPhase,
-          operate,
+  const { operate,
           clear,
-          continueOperation,
           setOperand,
           setOperator,
           getDisplayValue }
@@ -18,39 +16,28 @@
     '×': '*',
     '÷': '/'
   };
-//issue is here ffs
+
   const handleButtonClick = (payload) => {
     const { type, value } = payload;
   
     if (type === 'operand') {
-      if (currentPhase.value === 'enteringFirst') {
-        setOperand(value);
-        console.log(currentPhase.value)
-      } else if (currentPhase.value === 'enteringOperator') {
-        setOperand(value);
-        currentPhase.value = 'enteringSecond'
-        console.log(currentPhase.value)
-      } else if (currentPhase.value === 'enteringSecond') {
-        setOperand(value);
-      }
+      setOperand(value);
       return;
     }
 
     if (type === 'operator') {
-      
       if (value === '=') {
         operate();
-        currentPhase.value = 'showingResult';
-        console.log(currentPhase.value)
-      } else if (value === 'C') {
+        return;
+      }
+
+      if (value === 'C') {
         clear();
-        currentPhase.value = 'enteringFirst';
-        console.log(currentPhase.value)
-      } else if (operatorMap[value]) {
-        currentPhase.value = 'enteringOperator'
-        continueOperation();
+        return;
+      }
+
+      if (operatorMap[value]) {
         setOperator(operatorMap[value]);
-        console.log(currentPhase.value)
       }
     }
   };
@@ -85,36 +72,3 @@
     box-shadow: 5px 5px 12px 2px grey;
   }
 </style>
-
-<!-- const handleButtonClick = ({ type, value }) => {
-  if (type === 'operand') {
-    setOperand(value);
-
-    if (currentPhase.value === 'enteringFirst') {
-      currentPhase.value = 'enteringFirst';
-    } else if (currentPhase.value === 'enteringOperator') {
-      currentPhase.value = 'enteringSecond';
-    }
-
-    return;
-  }
-
-  if (type === 'operator') {
-    if (value === '=') {
-      operate();
-      currentPhase.value = 'showingResult';
-      return;
-    }
-
-    if (value === 'C') {
-      clear();
-      currentPhase.value = 'enteringFirst';
-      return;
-    }
-
-    if (operatorMap[value]) {
-      setOperator(operatorMap[value]);
-      currentPhase.value = 'enteringOperator';
-    }
-  }
-}; -->
