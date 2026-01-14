@@ -96,6 +96,13 @@ export function useCalculator() {
         mathOperator.value = operator;
     }
 
+    const operatorMap = {
+        '+': '+',
+        '−': '-',
+        '×': '*',
+        '÷': '/'
+    };
+
     const getDisplayValue = () => {
         switch (currentPhase.value) {
             case 'enteringFirst':
