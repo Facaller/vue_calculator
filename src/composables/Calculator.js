@@ -102,13 +102,11 @@ export function useCalculator() {
         '×': '*',
         '÷': '/'
     };
-// doesn't work because the set operator needs to access the map value, and
-// getDisplay needs to access the key.
-// make function solve both and use in btoh functions
+// split into 2 functions. Split mathOperator into 2 as well.
     const getOperatorMapItem = () => {
         Object.entries(operatorMap).forEach(([key, value]) => {
             if (key === mathOperator.value) {
-                return key;
+                return [key, value];
             }
         });
     };
