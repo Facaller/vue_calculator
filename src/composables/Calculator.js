@@ -5,6 +5,7 @@ export function useCalculator() {
     const valueOne = ref(null);
     const valueTwo = ref(null);
     const mathOperator = ref(null);
+    const displayMathOp = ref(null);
     const result = ref(null);
     
     const currentPhase = computed(() => {
@@ -102,11 +103,20 @@ export function useCalculator() {
         '×': '*',
         '÷': '/'
     };
-// split into 2 functions. Split mathOperator into 2 as well.
-    const getOperatorMapItem = () => {
-        Object.entries(operatorMap).forEach(([key, value]) => {
-            if (key === mathOperator.value) {
-                return [key, value];
+// split into 2 functions. Split mathOperator into 2 as well. I think these should
+// set the variables instead of getting them from the Map
+    const getOperatorMapValue = () => {
+        Object.entries(operatorMap).forEach(operator => {
+            if (operator[0] === mathOperator.value) {
+                mathOperator.value = operator[1];
+            }
+        });
+    };
+
+    const getOperatorMapKey = () => {
+        Object.entries(operatorMap).forEach(operator => {
+            if (operator[0] === displayMathOp.value) {
+                displayMathOp.value = operator[0];
             }
         });
     };
