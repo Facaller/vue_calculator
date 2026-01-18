@@ -10,13 +10,6 @@
           getDisplayValue }
         = useCalculator();
 
-  const operatorMap = {
-    '+': '+',
-    '−': '-',
-    '×': '*',
-    '÷': '/'
-  };
-
   const handleButtonClick = (payload) => {
     const { type, value } = payload;
   
@@ -35,10 +28,8 @@
         clear();
         return;
       }
-
-      if (operatorMap[value]) {
-        setOperator(operatorMap[value]);
-      }
+      
+      setOperator(value);
     }
   };
 

@@ -10,7 +10,7 @@ export function useCalculator() {
     
     const currentPhase = computed(() => {
         if (result.value !== null) return 'showingResult';
-        if (mathOperator.value && valueTwo.value === null) return 'enteringOperator';
+        if (displayMathOp.value && valueTwo.value === null) return 'enteringOperator';
         if (valueTwo.value !== null) return 'enteringSecond';
         return 'enteringFirst';
     });
@@ -39,6 +39,7 @@ export function useCalculator() {
         valueOne.value = null;
         valueTwo.value = null;
         mathOperator.value = null;
+        displayMathOp.value = null;
         result.value = null;
     }
 
@@ -94,7 +95,7 @@ export function useCalculator() {
         if (valueOne.value === null) return;
         
         applyAppendingOperation();
-        mathOperator.value = operator;
+        mapOperator(operator);
     }
 
     const operatorMap = {
@@ -103,20 +104,12 @@ export function useCalculator() {
         '×': '*',
         '÷': '/'
     };
-// split into 2 functions. Split mathOperator into 2 as well. I think these should
-// set the variables instead of getting them from the Map
-    const getOperatorMapValue = () => {
-        Object.entries(operatorMap).forEach(operator => {
-            if (operator[0] === mathOperator.value) {
-                mathOperator.value = operator[1];
-            }
-        });
-    };
 
-    const getOperatorMapKey = () => {
-        Object.entries(operatorMap).forEach(operator => {
-            if (operator[0] === displayMathOp.value) {
-                displayMathOp.value = operator[0];
+    const mapOperator = (operator) => {
+        Object.entries(operatorMap).forEach(([operatorKey, operatorValue]) => {
+            if (operator === operatorKey) {
+                displayMathOp.value = operatorKey;
+                mathOperator.value = operatorValue;
             }
         });
     };
@@ -126,7 +119,7 @@ export function useCalculator() {
             case 'enteringFirst':
                 return valueOne.value !== null ? valueOne.value : '';
             case 'enteringOperator':
-                return getOperatorMapItem();
+                return displayMathOp.value;
             case 'enteringSecond':
                 return valueTwo.value !== null ? valueTwo.value : '';
             case 'showingResult':
@@ -141,6 +134,7 @@ export function useCalculator() {
         clear,
         setOperand,
         setOperator,
+        mapOperator,
         getDisplayValue
     };
 }
