@@ -12,6 +12,10 @@ export function useCalculator() {
         if (result.value !== null) return 'showingResult';
         if (displayMathOp.value && valueTwo.value === null) return 'enteringOperator';
         if (valueTwo.value !== null) return 'enteringSecond';
+        console.log(currentPhase.value);
+        console.log(valueOne.value);
+        console.log(valueTwo.value);
+        console.log(mathOperator.value);
         return 'enteringFirst';
     });
 
@@ -77,25 +81,47 @@ export function useCalculator() {
     const setOperand = (value) => {
         const numericValue = Number(value);
 
-        if (!mathOperator.value) {
-        valueOne.value =
-            valueOne.value === null
-            ? numericValue
-            : valueOne.value * 10 + numericValue;
-        } else {
-        valueTwo.value =
-            valueTwo.value === null 
-            ? numericValue
-            : valueTwo.value * 10 + numericValue;
+        switch (currentPhase.value) {
+            case 'enteringFirst':
+                valueOne.value = valueOne.value === null
+                    ? numericValue
+                    : valueOne.value * 10 + numericValue;
+                break;
+            case 'enteringSecond':
+                valueTwo.value = valueTwo.value === null 
+                    ? numericValue
+                    : valueTwo.value * 10 + numericValue;
+                break;
+            case 'showingResult':
+                valueOne.value = numericValue;
+                valueTwo.value = null;
+                mathOperator.value = null;
+                result.value = null;
+                break;
+            case 'enteringOperator':
+                break;
+            default:
+                break;
         }
-        return true;
     }
     
     const setOperator = (operator) => {
+        switch (currentPhase.value) {
+            case 'enteringFirst':
+                mapOperator(operator);
+                break;
+            case 'enteringSecond':
+                applyAppendingOperation();
+                mapOperator(operator);
+                break;
+            case 'showingResult':
+                
+            default:
+                break;
+        }
         if (valueOne.value === null) return;
         
-        applyAppendingOperation();
-        mapOperator(operator);
+        
     }
 
     const operatorMap = {
