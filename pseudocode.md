@@ -1,352 +1,128 @@
-1. Are you correct about display = state, calculation = values?
+1. setOperand()
 
-Yes — mostly.
-And the “mostly” is important.
+Current goal: Update valueOne or valueTwo based on the phase and user input.
 
-What you have right now
+What to adjust:
 
-Display logic
-→ explicitly driven by currentPhase
-→ state-aware
+Clarify phase transitions: Each phase should be explicitly controlled (e.g., enteringFirst → enteringSecond), rather than implicitly depending on the computed state (currentPhase).
 
-Calculation logic (add, multiply, operate)
-→ purely numeric
-→ state-agnostic
+Ensure valid transitions: If the user presses a number while in showingResult, reset the values accordingly (i.e., transition to enteringFirst phase). This can be done in a centralized way, ensuring you never get stuck in the "result" state if the user starts typing again.
 
-That split is actually healthy.
+Goal: Make transitions more explicit, ensuring the correct state is set when operands are entered, and reduce reliance on computed properties for phase transitions.
 
-Math functions should not care about state.
-4 × 5 is 20 no matter why those numbers exist.
+2. setOperator()
 
-So you do not want to make your arithmetic state-aware.
+Current goal: Set the math operator (+, -, ×, ÷) based on user input and the current phase.
 
-Where things become inconsistent is not the math, but the input handling.
+What to adjust:
 
-2. The real problem area (and this is the key insight)
+Explicitly control phase transitions: Instead of relying on the computed currentPhase to decide what happens next, directly set the phase after the operator is set (e.g., enteringSecond, showingResult, etc.).
 
-The inconsistency is here:
+Refactor transition logic: The logic should not just check the phase but also ensure transitions are predictable. After performing an operation (e.g., after enteringSecond), you want to reset certain values, transition to the next state, and prepare for the next calculation.
 
-Input functions (setOperand, setOperator) are value-driven, not state-driven.
+Goal: Centralize the state management by controlling phase transitions more explicitly and avoiding reliance on the current phase for transition logic.
 
-These functions are doing double duty:
+3. operate()
 
-Interpreting user intent
+Current goal: Perform the math operation based on the current operator (+, -, ×, ÷).
 
-Mutating values
+What to adjust:
 
-They decide what the user meant by looking at:
+After operation, manage state: After the operation is completed, the state (particularly result) should be updated. Also, ensure the phase transition to showingResult occurs after the calculation is completed.
 
-valueOne
+Handle special cases: For example, if the operation results in an error (like division by zero), you should transition to a state where the UI reflects the error (perhaps transitioning to a showingError state).
 
-valueTwo
+Goal: Control state transitions right after performing operations to ensure the app is in the right state, and also ensure that special edge cases like errors are handled gracefully.
 
-mathOperator
+4. clear()
 
-Instead of:
+Current goal: Reset all state values to null or initial values.
 
-currentPhase
+What to adjust:
 
-That’s why things feel uneven.
+Phase reset: Make sure you also reset the currentPhase when clearing. Right now, you reset the values but not the phase, which might cause odd behavior if a user clears and then immediately enters values (since the phase won’t be reset).
 
-3. What you should not change
+Goal: Reset everything, including the currentPhase, ensuring that after clearing, the app is in a neutral state, like enteringFirst.
 
-Let’s be clear about what is already fine and should stay as-is conceptually:
+5. getDisplayValue()
 
-✅ Arithmetic functions
+Current goal: Return the appropriate display value based on the current phase (valueOne, valueTwo, result, or displayMathOp).
 
-add, subtract, multiply, divide
+What to adjust:
 
-operate
+Simplify with computed: The logic is solid, but consider removing redundancy. Since displayMathOp is just the UI-friendly version of mathOperator, it can be computed dynamically rather than stored as its own state. This reduces unnecessary state.
 
-These should:
+Goal: Simplify by deriving displayMathOp on-the-fly rather than storing it as a separate piece of state, and keep this function focused solely on determining what should be displayed.
 
-Assume valid inputs
+6. mapOperator()
 
-Do the math
+Current goal: Map the operator symbols to their corresponding calculation symbols (+ to +, − to -, etc.).
 
-Return / set results
+What to adjust:
 
-No state awareness needed.
+Refactor setOperator: The operator mapping logic is solid, but instead of being invoked from setOperator, consider simplifying how operators are handled in the main flow of setOperator. Ensure that the operator setting and phase transition are both clearly defined.
 
-✅ Display logic
+Goal: Make operator mapping a part of the larger operator-handling logic, ensuring operators are set and applied with minimal side effects.
 
-getDisplayValue
+7. applyAppendingOperation()
 
-currentPhase
+Current goal: Apply the operation between valueOne and valueTwo, then update the state and prepare for the next entry.
 
-This is already state-first, and you should keep it that way.
+What to adjust:
 
-4. Where to focus your effort (without a rewrite)
+Transition logic: After applying the operation, ensure that the app transitions to the correct state, which is typically enteringSecond or showingResult depending on the user's next action. The operation logic is fine, but you want to ensure that transitions after applying operations are smooth and predictable.
 
-If you want uniformity, focus on input interpretation, not calculation.
+Goal: Centralize the state management for operations, making sure the app moves to the next phase correctly after performing an operation.
 
-Specifically:
+Key Goals for Refinement:
 
-setOperand
+Centralized state transitions: Ensure transitions are explicit and happen right after actions, like when setting an operator or operand.
 
-setOperator
+Simplify redundant state: Avoid storing values that can be derived from other pieces of state (e.g., displayMathOp can be derived from mathOperator).
 
-(and to a lesser degree) applyAppendingOperation
+Edge case handling: Be mindful of transitions during edge cases, like pressing an operator after seeing a result or clearing the calculator and entering a new value immediately.
 
-These functions should:
+Predictable state flow: Ensure each function manages its part of the state clearly—either modifying state directly or triggering a transition that is easy to track.
 
-Ask what phase am I in?
 
-Decide what this input means in that phase
+*****************
 
-Then update values accordingly
 
-Right now they mostly skip step 1.
+The Core Change: Explicitly Setting State
 
-5. A minimal mental refactor (no new architecture)
+First, yes, your instinct to create a setPhase function to explicitly set the state (i.e., manage transitions) is spot on. Instead of relying on the computed currentPhase, you’ll use setPhase to directly control the phase state. This will make your code clearer and more predictable.
 
-You do not need to:
+How This Integrates with Your App
 
-Introduce a new state variable
+The idea is that you control state transitions within your composable, then call that composable from your App component. So instead of the App or Buttons component managing the transitions directly, it delegates this responsibility to the useCalculator composable.
 
-Rewrite everything as a reducer
+Steps for the Refactor:
+1. Create setPhase in useCalculator
 
-Build a full FSM
+In your composable (useCalculator), create the setPhase function to manage phase transitions:
 
-You already have state — it’s just underused.
+const setPhase = (newPhase) => {
+  currentPhase.value = newPhase;
+};
 
-Conceptual shift (no code yet):
 
-Instead of thinking:
+This function will be used to explicitly set the phase whenever you transition from one phase to another, such as after pressing an operator or entering a number.
 
-“If mathOperator exists, this digit goes to valueTwo”
+2. Amend the setOperand and setOperator Functions
 
-Think:
+Now that you have setPhase, refactor your existing logic in setOperand and setOperator to use this new function for transitions.
 
-“If I am enteringSecond, this digit goes to valueTwo”
+For example:
 
-Instead of:
+After setting valueOne or valueTwo in setOperand, you will call setPhase() to explicitly transition to the next phase.
 
-“If valueOne exists, allow operator”
+In setOperator, after the operator is set, ensure the phase is updated by calling setPhase as appropriate (e.g., enteringSecond or showingResult).
 
-Think:
+3. Use getDisplayValue Directly in the App Template
 
-“If I am enteringFirst or showingResult, operator means X”
+Now, you’re right in saying that getDisplayValue is being passed down from your composable. Since this is a computed property that reflects the state in your composable, you don't need to make any significant changes here. Just make sure that your App component is properly passing the display value to the DisplayScreen:
 
-This is a change in decision-making, not data structure.
+<DisplayScreen :displayValue="getDisplayValue()" />
 
-6. Function-by-function guidance (high level)
-setOperand
 
-This is the biggest culprit — and that’s normal.
-
-Right now it asks:
-
-“Do I have an operator?”
-
-Instead, it should conceptually ask:
-
-“What phase am I in?”
-
-There are phases where a digit should:
-
-Append
-
-Start a new number
-
-Reset previous values first
-
-You don’t need to change how numbers append — only when that logic is allowed to run.
-
-setOperator
-
-This one is closer to correct already.
-
-It partially respects state by:
-
-Guarding against valueOne === null
-
-Applying pending operations
-
-Where it can improve conceptually:
-
-Operator after showingResult is valid and meaningful
-
-Operator while enteringOperator might mean “replace operator”
-
-Operator in other phases might be ignored
-
-Again: interpretation first, mutation second.
-
-applyAppendingOperation
-
-This function is doing something very good:
-
-It enforces a rule about when chained operations occur
-
-But it’s still value-driven.
-
-A small conceptual shift:
-
-Think of this as a state transition helper, not a math helper
-
-Its job is:
-
-“If the current state represents a complete expression, resolve it and move to the next state.”
-
-That framing will make it easier to reason about.
-
-7. The unifying principle you’re aiming for
-
-You don’t need everything to be state-based.
-
-What you want is this consistency:
-
-State decides behavior.
-Values store data.
-Math transforms data.
-
-Right now:
-
-Math is clean
-
-Display is clean
-
-Input interpretation is mixed
-
-So target input interpretation only.
-
-8. A simple self-check as you refactor
-
-For each input handler, ask yourself:
-
-“Could two different states reach this line of code and expect different behavior?”
-
-If the answer is “yes”:
-
-That decision should be based on state, not values
-
-If the answer is “no”:
-
-Value-based logic is fine
-
-This question alone will guide you without overengineering.
-
-9. Final reassurance
-
-You’re not “doing it wrong” — you’ve just hit the point where implicit state stops scaling.
-
-The fact that you:
-
-Identified the mismatch
-
-Don’t want to rewrite
-
-Are asking which parts to adjust
-
-…is exactly how experienced devs evolve systems safely.
-
-
-**********************
-
-
-1. Walking through setOperand (easy but impactful)
-
-We’ll break it down and think through how we can state-ify this function without overcomplicating it. This function will be our “test case,” and we can then apply similar reasoning to other parts of your code.
-
-Here’s your current setOperand:
-
-const setOperand = (value) => {
-    const numericValue = Number(value);
-
-    if (!mathOperator.value) {
-        valueOne.value =
-            valueOne.value === null
-            ? numericValue
-            : valueOne.value * 10 + numericValue;
-    } else {
-        valueTwo.value =
-            valueTwo.value === null 
-            ? numericValue
-            : valueTwo.value * 10 + numericValue;
-    }
-    return true;
-}
-
-
-Current Logic Breakdown:
-
-When mathOperator is null, the function appends to valueOne.
-
-When mathOperator is present, it appends to valueTwo.
-
-What’s missing here?
-It’s not taking into account the current phase. Right now, it’s only focusing on whether there’s an operator or not, and it just continues appending based on that.
-
-Let’s break this down with state-awareness
-
-What phase am I in?
-
-First, we introduce the idea of phases. You already have a good idea of the possible states (enteringFirst, enteringOperator, enteringSecond, showingResult) via currentPhase.
-
-What should pressing a digit mean in this phase?
-
-In enteringFirst:
-
-We can append digits to valueOne, starting a number.
-
-In enteringSecond:
-
-We can append digits to valueTwo, continuing the second operand.
-
-In showingResult:
-
-We should likely start a new calculation (i.e., reset everything and enter the number again, as continuing from a result typically starts a new calculation).
-
-In enteringOperator:
-
-This phase is a bit tricky, as no operand should be entered, but we could handle edge cases (like starting a new calculation if something odd happens, though normally we expect an operator here).
-
-State-aware setOperand
-
-Let’s rework the function with these phases in mind:
-
-const setOperand = (value) => {
-    const numericValue = Number(value);
-
-    switch (currentPhase.value) {
-        case 'enteringFirst':
-            // Append to valueOne, starting or continuing a number
-            valueOne.value = valueOne.value === null
-                ? numericValue
-                : valueOne.value * 10 + numericValue;
-            break;
-        
-        case 'enteringSecond':
-            // Append to valueTwo, starting or continuing the second operand
-            valueTwo.value = valueTwo.value === null
-                ? numericValue
-                : valueTwo.value * 10 + numericValue;
-            break;
-        
-        case 'showingResult':
-            // If we’re showing a result, start fresh with the new number
-            valueOne.value = numericValue;
-            valueTwo.value = null;  // Reset the second operand
-            mathOperator.value = null;  // Clear the operator
-            result.value = null;  // Reset the result (since we're starting over)
-            break;
-        
-        case 'enteringOperator':
-            // In this phase, we're in between operands, so we shouldn't append a number.
-            break;
-
-        default:
-            break;
-    }
-    
-    return true;
-}
-
-What changed?
-
-We added a state-based switch to check currentPhase instead of just checking mathOperator.
-
-This shift makes sure we only append digits where appropriate.
-
-In showingResult, pressing a number resets everything and starts fresh, which makes sense in typical calculator behavior (a result is often a signal that you want to start a new calculation).
+Since getDisplayValue is based on the current phase (currentPhase) and state (valueOne, valueTwo, result), you don’t need to modify it unless you’re simplifying things like the displayMathOp (which could be computed dynamically instead of stored as state). But as it stands, this should work as expected.
