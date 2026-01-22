@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 export function useCalculator() {
 
@@ -7,17 +7,21 @@ export function useCalculator() {
     const mathOperator = ref(null);
     const displayMathOp = ref(null);
     const result = ref(null);
-    
-    const currentPhase = computed(() => {
-        if (result.value !== null) return 'showingResult';
-        if (displayMathOp.value && valueTwo.value === null) return 'enteringOperator';
-        if (valueTwo.value !== null) return 'enteringSecond';
-        console.log(currentPhase.value);
-        console.log(valueOne.value);
-        console.log(valueTwo.value);
-        console.log(mathOperator.value);
-        return 'enteringFirst';
-    });
+    const currentPhase = ref('enteringFirst');
+
+    const setPhase = (newPhase) => {
+        currentPhase.value = newPhase;
+    };
+    // const currentPhase = computed(() => {
+    //     if (result.value !== null) return 'showingResult';
+    //     if (displayMathOp.value && valueTwo.value === null) return 'enteringOperator';
+    //     if (valueTwo.value !== null) return 'enteringSecond';
+    //     console.log(currentPhase.value);
+    //     console.log(valueOne.value);
+    //     console.log(valueTwo.value);
+    //     console.log(mathOperator.value);
+    //     return 'enteringFirst';
+    // });
 
     function add () {
         return result.value = valueOne.value + valueTwo.value;
@@ -45,6 +49,7 @@ export function useCalculator() {
         mathOperator.value = null;
         displayMathOp.value = null;
         result.value = null;
+        setPhase('enteringFirst');
     }
 
     function operate () {
@@ -103,6 +108,8 @@ export function useCalculator() {
             default:
                 break;
         }
+
+        
     }
     
     const setOperator = (operator) => {
