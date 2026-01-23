@@ -11,6 +11,7 @@ export function useCalculator() {
 
     const setPhase = (newPhase) => {
         currentPhase.value = newPhase;
+        console.log(currentPhase.value);
     };
     // const currentPhase = computed(() => {
     //     if (result.value !== null) return 'showingResult';
@@ -54,21 +55,13 @@ export function useCalculator() {
 
     function operate () {
         switch (mathOperator.value) {
-            case '+':
-                add();
-                break;
-            case '-':
-                subtract();
-                break;
-            case '*':
-                multiply();
-                break;
-            case '/':
-                divide();
-                break;
-            default:
-                result.value = 0;
+            case '+': add(); break;
+            case '-': subtract(); break;
+            case '*': multiply(); break;
+            case '/': divide(); break;
+            default: result.value = 0;
         }
+        setPhase('showResult');
     }
 
     function applyAppendingOperation () {
@@ -102,19 +95,20 @@ export function useCalculator() {
                 valueTwo.value = null;
                 mathOperator.value = null;
                 result.value = null;
+                setPhase('enteringFirst');
                 break;
             case 'enteringOperator':
                 break;
             default:
                 break;
         }
-
-        
     }
     
     const setOperator = (operator) => {
+        console.log(currentPhase.value)
         switch (currentPhase.value) {
             case 'enteringFirst':
+                if (valueOne.value === null) return;
                 mapOperator(operator);
                 break;
             case 'enteringSecond':
@@ -122,13 +116,15 @@ export function useCalculator() {
                 mapOperator(operator);
                 break;
             case 'showingResult':
-                
+                valueOne.value = result.value;
+                valueTwo.value = null;
+                mathOperator.value = operator;
+                result.value = null;
+                setPhase('enteringOperator');
+                break;
             default:
                 break;
         }
-        if (valueOne.value === null) return;
-        
-        
     }
 
     const operatorMap = {
