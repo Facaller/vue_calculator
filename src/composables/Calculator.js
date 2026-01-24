@@ -11,7 +11,7 @@ export function useCalculator() {
 
     const setPhase = (newPhase) => {
         currentPhase.value = newPhase;
-        console.log(currentPhase.value);
+        // console.log(currentPhase.value);
     };
     // const currentPhase = computed(() => {
     //     if (result.value !== null) return 'showingResult';
@@ -102,9 +102,12 @@ export function useCalculator() {
             default:
                 break;
         }
+        
     }
     
     const setOperator = (operator) => {
+        setPhase('enteringOperator');
+
         console.log(currentPhase.value)
         switch (currentPhase.value) {
             case 'enteringFirst':
@@ -118,13 +121,17 @@ export function useCalculator() {
             case 'showingResult':
                 valueOne.value = result.value;
                 valueTwo.value = null;
-                mathOperator.value = operator;
+                mapOperator(operator);
                 result.value = null;
                 setPhase('enteringOperator');
+                break;
+            case 'enteringOperator':
+                mapOperator(operator);
                 break;
             default:
                 break;
         }
+        setPhase('enteringSecond');
     }
 
     const operatorMap = {
