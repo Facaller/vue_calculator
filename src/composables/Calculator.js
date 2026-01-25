@@ -11,8 +11,10 @@ export function useCalculator() {
 
     const setPhase = (newPhase) => {
         currentPhase.value = newPhase;
-        // console.log(currentPhase.value);
     };
+    const transitionPhases = (input) {
+        
+    }
     // const currentPhase = computed(() => {
     //     if (result.value !== null) return 'showingResult';
     //     if (displayMathOp.value && valueTwo.value === null) return 'enteringOperator';
@@ -131,7 +133,6 @@ export function useCalculator() {
             default:
                 break;
         }
-        setPhase('enteringSecond');
     }
 
     const operatorMap = {
