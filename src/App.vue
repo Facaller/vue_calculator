@@ -3,7 +3,8 @@
   import ButtonsComponent from './components/ButtonsComponent.vue';
   import DisplayScreen from './components/DisplayScreen.vue';
 
-  const { operate,
+  const { transitionPhases,
+          operate,
           clear,
           setOperand,
           setOperator,
@@ -19,6 +20,7 @@
     }
 
     if (type === 'operator') {
+      transitionPhases();
       if (value === '=') {
         operate();
         return;

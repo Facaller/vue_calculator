@@ -12,8 +12,12 @@ export function useCalculator() {
     const setPhase = (newPhase) => {
         currentPhase.value = newPhase;
     };
-    const transitionPhases = (input) {
-        
+    const transitionPhases = () => {
+        if (currentPhase.value === 'enteringFirst') return setPhase('enteringOperator');
+        if (currentPhase.value === 'enteringOperator') return setPhase('enteringSecond');
+        if (currentPhase.value === 'enteringSecond') return setPhase('showResult');
+
+        return setPhase('enteringFirst');
     }
     // const currentPhase = computed(() => {
     //     if (result.value !== null) return 'showingResult';
@@ -52,7 +56,6 @@ export function useCalculator() {
         mathOperator.value = null;
         displayMathOp.value = null;
         result.value = null;
-        setPhase('enteringFirst');
     }
 
     function operate () {
@@ -63,7 +66,6 @@ export function useCalculator() {
             case '/': divide(); break;
             default: result.value = 0;
         }
-        setPhase('showResult');
     }
 
     function applyAppendingOperation () {
@@ -97,7 +99,6 @@ export function useCalculator() {
                 valueTwo.value = null;
                 mathOperator.value = null;
                 result.value = null;
-                setPhase('enteringFirst');
                 break;
             case 'enteringOperator':
                 break;
@@ -108,7 +109,6 @@ export function useCalculator() {
     }
     
     const setOperator = (operator) => {
-        setPhase('enteringOperator');
 
         console.log(currentPhase.value)
         switch (currentPhase.value) {
@@ -125,7 +125,6 @@ export function useCalculator() {
                 valueTwo.value = null;
                 mapOperator(operator);
                 result.value = null;
-                setPhase('enteringOperator');
                 break;
             case 'enteringOperator':
                 mapOperator(operator);
@@ -167,11 +166,11 @@ export function useCalculator() {
     };
 
     return {
+        transitionPhases,
         operate,
         clear,
         setOperand,
         setOperator,
-        mapOperator,
         getDisplayValue
     };
 }
