@@ -13,12 +13,32 @@ export function useCalculator() {
         currentPhase.value = newPhase;
     };
     const transitionPhases = () => {
-        if (currentPhase.value === 'enteringFirst') return setPhase('enteringOperator');
-        if (currentPhase.value === 'enteringOperator') return setPhase('enteringSecond');
-        if (currentPhase.value === 'enteringSecond') return setPhase('showResult');
-
-        return setPhase('enteringFirst');
-    }
+        switch (currentPhase.value) {
+            case 'enteringFirst':
+                if (valueOne.value !== null && mathOperator.value !== null) {
+                    setPhase('enteringOperator');
+                }
+                break;
+            case 'enteringOperator':
+                if (mathOperator.value !== null && valueOne.value !== null) {
+                    setPhase('enteringSecond');
+                }
+                break;
+            case 'enteringSecond':
+                if (valueTwo.value !== null) {
+                    setPhase('showingResult');
+                }
+                break;
+            case 'showingResult':
+                setPhase('enteringFirst');
+                break;
+            default:
+                setPhase('enteringFirst');
+        }
+        console.log(valueOne.value);
+        console.log(valueTwo.value);
+        console.log(mathOperator.value);    
+    };
     // const currentPhase = computed(() => {
     //     if (result.value !== null) return 'showingResult';
     //     if (displayMathOp.value && valueTwo.value === null) return 'enteringOperator';
@@ -93,6 +113,7 @@ export function useCalculator() {
                 valueTwo.value = valueTwo.value === null 
                     ? numericValue
                     : valueTwo.value * 10 + numericValue;
+                    console.log('reach here in operator')
                 break;
             case 'showingResult':
                 valueOne.value = numericValue;
@@ -105,33 +126,37 @@ export function useCalculator() {
             default:
                 break;
         }
-        
+        console.log(currentPhase.value)
     }
     
     const setOperator = (operator) => {
-
-        console.log(currentPhase.value)
         switch (currentPhase.value) {
             case 'enteringFirst':
                 if (valueOne.value === null) return;
                 mapOperator(operator);
+                transitionPhases();
                 break;
             case 'enteringSecond':
                 applyAppendingOperation();
                 mapOperator(operator);
+                transitionPhases();
                 break;
             case 'showingResult':
                 valueOne.value = result.value;
                 valueTwo.value = null;
-                mapOperator(operator);
                 result.value = null;
+                mapOperator(operator);
+                transitionPhases();
                 break;
             case 'enteringOperator':
+                console.log('reach here in operator')
                 mapOperator(operator);
+                transitionPhases();
                 break;
             default:
                 break;
         }
+        console.log(currentPhase.value)
     }
 
     const operatorMap = {

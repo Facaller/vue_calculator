@@ -1,167 +1,144 @@
-You're right to point out that shifting state based on your ref variables does somewhat mirror a "derived state" approach, where you're deriving one state from another (in this case, derived from valueOne, valueTwo, currentPhase, etc.). But there’s an important distinction to be made between explicit state management and derived state.
+What’s actually happening (step-by-step)
 
-In a derived state model, the state (like the currentPhase) is automatically computed based on the other values, usually through a computed property (which automatically reacts to changes in dependent variables). This can lead to implicit transitions between states, which might be harder to track and control.
+Let’s trace the happy path you expect:
 
-In contrast, explicit state management is about you manually deciding when and where the state should change and making those transitions deliberate. This approach gives you more control over the flow of your app and lets you decide exactly when and why each transition happens.
+User enters digits → valueOne builds
 
-The Role of the State Controller
+User presses operator → phase should move toward entering second operand
 
-Yes, your state controller should absolutely decide when and where to change state. In fact, that’s the core function of a state controller. However, where the state is modified depends on the architecture you’re aiming for. If you think of setPhase as part of your state controller, it should be called explicitly when the app decides to move from one state to another.
+User enters digits → valueTwo builds and displays
 
-In the example where I placed setPhase inside setOperand, I was aiming to help explicitly manage the state transition after an operand was set. But if you want to centralize and control all state changes from one place (i.e., the state controller), you should handle that in a way that avoids spreading out phase changes across various parts of the app.
+Now let’s compare that to what your app is really doing.
 
-Clarifying the Separation of Concerns
+The key observation
 
-The confusion might arise because you’re mixing state transitions (deciding which phase to be in) with state updates (like changing the valueOne, valueTwo, etc.). You want the state controller to be responsible for deciding the transitions, but not directly modifying the operands and other values. Instead, the operands themselves (via setOperand and other functions) should handle the updates, and the controller should simply manage the state transitions based on those updates.
+Your phase only advances when transitionPhases is called — and you are not calling it at the moment the second operand should begin.
 
-Refining the transitionPhases Function
+That’s the entire bug, in one sentence.
 
-To align more with your idea of centralized state management, let's update the transitionPhases function so that the state controller is only responsible for managing when transitions should happen, without getting involved in operand updates. Here's a refined approach:
+Where the flow stalls
+1. You press an operator (this part works)
 
-1. Make State Transitions Explicit:
+You are in enteringFirst
 
-Your state transitions should be triggered based on specific actions like pressing an operator, entering a number, or performing a calculation. These transitions should be handled only by the state controller (your transitionPhases function).
+mapOperator runs
 
-2. Separate State Updates from Transitions:
+You call transitionPhases
 
-The operand handling (e.g., setOperand) can still happen independently of state transitions. The state controller only decides when it's appropriate to move to the next phase, but it doesn't need to modify the operands directly.
+Phase changes from enteringFirst → enteringOperator
 
-Revised Approach for State Control
+So far, so good.
 
-Let’s revise the flow:
+2. Now the user presses a number (this is where it breaks)
 
-State Controller (transitionPhases)
+You are now in enteringOperator
 
-This is the central controller that decides when state changes based on the current state and user interaction.
+setOperand runs
 
-const transitionPhases = () => {
-    switch (currentPhase.value) {
-        case 'enteringFirst':
-            if (valueOne.value !== null && mathOperator.value !== null) {
-                // If the first operand is set and an operator is chosen, move to entering operator
-                setPhase('enteringOperator');
-            }
-            break;
+But in enteringOperator, you explicitly do nothing
 
-        case 'enteringOperator':
-            if (mathOperator.value !== null && valueOne.value !== null) {
-                // If operator is chosen and the first operand is set, move to enteringSecond
-                setPhase('enteringSecond');
-            }
-            break;
+You also do not call transitionPhases here
 
-        case 'enteringSecond':
-            if (valueTwo.value !== null) {
-                // After second operand is set, move to showing result
-                setPhase('showingResult');
-            }
-            break;
+So:
 
-        case 'showingResult':
-            // Once result is displayed, return to enteringFirst for new calculation
-            setPhase('enteringFirst');
-            break;
+The phase never advances
 
-        default:
-            setPhase('enteringFirst');
-    }
-};
+You never reach enteringSecond
 
-Operand Handling (setOperand)
+Input is ignored
 
-The state updates for operands still occur in setOperand. The operands themselves are updated based on user input (number press), but you don’t need to manually trigger state transitions from here.
+Display stays empty
 
-const setOperand = (value) => {
-    const numericValue = Number(value);
+App looks “frozen”
 
-    switch (currentPhase.value) {
-        case 'enteringFirst':
-            valueOne.value = valueOne.value === null
-                ? numericValue
-                : valueOne.value * 10 + numericValue;
-            break;
+This matches your symptoms exactly.
 
-        case 'enteringSecond':
-            valueTwo.value = valueTwo.value === null
-                ? numericValue
-                : valueTwo.value * 10 + numericValue;
-            break;
+Why your logic looks correct but still fails
 
-        case 'showingResult':
-            valueOne.value = numericValue;
-            valueTwo.value = null;
-            result.value = null;
-            mathOperator.value = null;
-            break;
+Your transition rules themselves are fine.
 
-        case 'enteringOperator':
-            // In this phase, no operand input is allowed
-            break;
+The issue is when transitions are allowed to occur:
 
-        default:
-            break;
-    }
-};
+You transition on operator presses
 
-Operator Handling (setOperator)
+But not on number presses
 
-In this function, we need to make sure that operators can only be pressed when we are in the correct phase. After pressing an operator, we can handle the transition.
+Yet the transition from enteringOperator → enteringSecond logically depends on user intent, not new data
 
-const setOperator = (operator) => {
-    switch (currentPhase.value) {
-        case 'enteringFirst':
-            if (valueOne.value !== null) {
-                mapOperator(operator);
-                transitionPhases(); // Transition to enteringOperator or enteringSecond
-            }
-            break;
+Right now, you’re waiting for another operator press to move forward — which never comes.
 
-        case 'enteringSecond':
-            if (valueTwo.value !== null) {
-                applyAppendingOperation();
-                mapOperator(operator);
-                transitionPhases(); // Move to showResult
-            }
-            break;
+The mental model mismatch
 
-        case 'showingResult':
-            // After showing result, prepare for new calculation
-            valueOne.value = result.value;
-            valueTwo.value = null;
-            result.value = null;
-            mapOperator(operator);
-            transitionPhases(); // Go to enteringOperator phase
-            break;
+You currently have this implicit rule:
 
-        case 'enteringOperator':
-            mapOperator(operator); // Just update operator in this phase
-            break;
+“Only operators can move phases forward.”
 
-        default:
-            break;
-    }
-};
+But the calculator UX rule is actually:
 
-Where Does transitionPhases Fit In?
+“Once an operator is chosen, the next number press begins the second operand.”
 
-transitionPhases is the central function that decides the transition from one phase to another.
+That means:
 
-It’s called when you want to change the state of the app: after entering a number, pressing an operator, or calculating the result.
+The number press is the event that should unlock enteringSecond
 
-You’re not directly modifying the operands in transitionPhases; instead, you’re managing when those operands should be collected or when the app should move to the next phase.
+Not another operator press
 
-Why This Works:
+Why your console logs are confusing (but truthful)
 
-The logic of managing the current phase is centralized. Now, transitionPhases is fully responsible for deciding when and how to change the state.
+Your logs correctly show:
 
-Operand updates (like setOperand) happen based on user input, but the phase transitions are decided separately by the state controller.
+valueOne exists
 
-This keeps the concerns clean: state control in transitionPhases and operand updates in setOperand. The controller doesn’t modify the operand values directly but instead controls the flow of the app (e.g., from enteringFirst to enteringOperator).
+mathOperator exists
 
-Next Steps:
+Phase is still enteringOperator
 
-Review state transitions: Make sure transitionPhases is called in all the appropriate places (after an operator is pressed, when operands are entered, etc.).
+So your brain says:
 
-Decouple operand updates from phase transitions: Ensure operand logic happens independently of the state control.
+“But the transition conditions are satisfied!”
 
-Test state flows: Test the state transitions to ensure they happen at the right moments (e.g., when entering the second operand, after pressing the operator, etc.).
+They are — but the function that checks them is never being called at that moment.
+
+No call → no evaluation → no transition.
+
+Secondary (but important) observations
+
+These aren’t the main bug, but they will bite you later:
+
+1. showingResult auto-resets immediately
+
+If transitionPhases is ever called while in showingResult, it immediately jumps back to enteringFirst. That makes the result phase very fragile.
+
+2. clear() doesn’t reset the phase
+
+You clear all values, but the phase could still be enteringSecond or enteringOperator, which can cause weird behavior afterward.
+
+3. Display depends on phase and value
+
+So even when the phase is right, nothing renders until the value is non-null — which can make debugging feel misleading.
+
+The core fix (conceptually, no code)
+
+Think in terms of events, not functions:
+
+Operator press → choose operator
+
+First number press after operator → begin second operand
+
+That moment is when the phase must advance
+
+So ask yourself:
+
+“What is the first moment the user intends to enter the second number?”
+
+That’s where the transition belongs.
+
+A good rule of thumb going forward
+
+Transitions should respond to user intent
+
+Operand updates respond to user data
+
+If a user action changes meaning based on phase, that action probably needs to notify the state controller
+
+You’re very close — this is exactly the kind of bug that shows up when your architecture is almost right.
