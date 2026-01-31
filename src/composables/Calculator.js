@@ -99,7 +99,7 @@ export function useCalculator() {
             result.value = null;
         }
     }
-    
+    //ideally put 
     const setOperand = (value) => {
         const numericValue = Number(value);
 
@@ -108,8 +108,13 @@ export function useCalculator() {
                 valueOne.value = valueOne.value === null
                     ? numericValue
                     : valueOne.value * 10 + numericValue;
+                    transitionPhases();
+                break;
+            case 'enteringOperator':
+                transitionPhases();
                 break;
             case 'enteringSecond':
+                //can put transition phases here hypothetically
                 valueTwo.value = valueTwo.value === null 
                     ? numericValue
                     : valueTwo.value * 10 + numericValue;
@@ -120,8 +125,6 @@ export function useCalculator() {
                 valueTwo.value = null;
                 mathOperator.value = null;
                 result.value = null;
-                break;
-            case 'enteringOperator':
                 break;
             default:
                 break;
