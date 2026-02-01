@@ -99,16 +99,24 @@ export function useCalculator() {
             result.value = null;
         }
     }
-    //ideally put 
+
+    // const insertOperand = (operand, value) => {
+    //     if (operand === null) {
+    //         return value = operand;
+    //     } else {
+    //         return value * 10 + operand;
+    //     }
+    // }
+// need to add enteringSecond logic to enteringOperator so that first operator
+// can begin transition to enteringSecond
     const setOperand = (value) => {
         const numericValue = Number(value);
-
+        transitionPhases();
         switch (currentPhase.value) {
             case 'enteringFirst':
                 valueOne.value = valueOne.value === null
                     ? numericValue
                     : valueOne.value * 10 + numericValue;
-                    transitionPhases();
                 break;
             case 'enteringOperator':
                 transitionPhases();
