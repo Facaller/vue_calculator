@@ -111,7 +111,7 @@ export function useCalculator() {
 // can begin transition to enteringSecond
     const setOperand = (value) => {
         const numericValue = Number(value);
-        transitionPhases();
+        
         switch (currentPhase.value) {
             case 'enteringFirst':
                 valueOne.value = valueOne.value === null
@@ -119,14 +119,15 @@ export function useCalculator() {
                     : valueOne.value * 10 + numericValue;
                 break;
             case 'enteringOperator':
-                transitionPhases();
-                break;
-            case 'enteringSecond':
-                //can put transition phases here hypothetically
                 valueTwo.value = valueTwo.value === null 
                     ? numericValue
                     : valueTwo.value * 10 + numericValue;
-                    console.log('reach here in operator')
+                transitionPhases();
+                break;
+            case 'enteringSecond':
+                valueTwo.value = valueTwo.value === null 
+                    ? numericValue
+                    : valueTwo.value * 10 + numericValue;
                 break;
             case 'showingResult':
                 valueOne.value = numericValue;
@@ -152,6 +153,11 @@ export function useCalculator() {
                 mapOperator(operator);
                 transitionPhases();
                 break;
+            case 'enteringOperator':
+                console.log('reach here in operator')
+                mapOperator(operator);
+                transitionPhases();
+                break;
             case 'showingResult':
                 valueOne.value = result.value;
                 valueTwo.value = null;
@@ -159,11 +165,7 @@ export function useCalculator() {
                 mapOperator(operator);
                 transitionPhases();
                 break;
-            case 'enteringOperator':
-                console.log('reach here in operator')
-                mapOperator(operator);
-                transitionPhases();
-                break;
+
             default:
                 break;
         }
