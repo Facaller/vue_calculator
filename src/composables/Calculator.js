@@ -39,16 +39,6 @@ export function useCalculator() {
         console.log(valueTwo.value);
         console.log(mathOperator.value);    
     };
-    // const currentPhase = computed(() => {
-    //     if (result.value !== null) return 'showingResult';
-    //     if (displayMathOp.value && valueTwo.value === null) return 'enteringOperator';
-    //     if (valueTwo.value !== null) return 'enteringSecond';
-    //     console.log(currentPhase.value);
-    //     console.log(valueOne.value);
-    //     console.log(valueTwo.value);
-    //     console.log(mathOperator.value);
-    //     return 'enteringFirst';
-    // });
 
     function add () {
         return result.value = valueOne.value + valueTwo.value;
@@ -100,13 +90,6 @@ export function useCalculator() {
         }
     }
 
-    // const insertOperand = (operand, value) => {
-    //     if (operand === null) {
-    //         return value = operand;
-    //     } else {
-    //         return value * 10 + operand;
-    //     }
-    // }
 // need to add enteringSecond logic to enteringOperator so that first operator
 // can begin transition to enteringSecond
     const setOperand = (value) => {
@@ -142,6 +125,7 @@ export function useCalculator() {
     }
     
     const setOperator = (operator) => {
+        console.log(operator);
         switch (currentPhase.value) {
             case 'enteringFirst':
                 if (valueOne.value === null) return;
@@ -149,12 +133,10 @@ export function useCalculator() {
                 transitionPhases();
                 break;
             case 'enteringSecond':
-                applyAppendingOperation();
-                mapOperator(operator);
+                operate();
                 transitionPhases();
                 break;
             case 'enteringOperator':
-                console.log('reach here in operator')
                 mapOperator(operator);
                 transitionPhases();
                 break;
@@ -176,7 +158,7 @@ export function useCalculator() {
         '+': '+',
         '−': '-',
         '×': '*',
-        '÷': '/'
+        '÷': '/',
     };
 
     const mapOperator = (operator) => {
@@ -209,6 +191,7 @@ export function useCalculator() {
         clear,
         setOperand,
         setOperator,
-        getDisplayValue
+        getDisplayValue,
+        applyAppendingOperation
     };
 }
