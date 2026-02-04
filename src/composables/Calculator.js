@@ -15,12 +15,12 @@ export function useCalculator() {
     const transitionPhases = () => {
         switch (currentPhase.value) {
             case 'enteringFirst':
-                if (valueOne.value !== null && mathOperator.value !== null) {
+                if (valueOne.value !== null) {
                     setPhase('enteringOperator');
                 }
                 break;
             case 'enteringOperator':
-                if (mathOperator.value !== null && valueOne.value !== null) {
+                if (mathOperator.value !== null) {
                     setPhase('enteringSecond');
                 }
                 break;
@@ -30,7 +30,7 @@ export function useCalculator() {
                 }
                 break;
             case 'showingResult':
-                setPhase('enteringFirst');
+                
                 break;
             default:
                 setPhase('enteringFirst');
@@ -69,6 +69,7 @@ export function useCalculator() {
     }
 
     function operate () {
+        transitionPhases();
         switch (mathOperator.value) {
             case '+': add(); break;
             case '-': subtract(); break;
@@ -102,10 +103,11 @@ export function useCalculator() {
                     : valueOne.value * 10 + numericValue;
                 break;
             case 'enteringOperator':
+                transitionPhases();
                 valueTwo.value = valueTwo.value === null 
                     ? numericValue
                     : valueTwo.value * 10 + numericValue;
-                transitionPhases();
+                
                 break;
             case 'enteringSecond':
                 valueTwo.value = valueTwo.value === null 
@@ -128,30 +130,31 @@ export function useCalculator() {
         console.log(operator);
         switch (currentPhase.value) {
             case 'enteringFirst':
-                if (valueOne.value === null) return;
+                transitionPhases();
                 mapOperator(operator);
-                transitionPhases();
-                break;
-            case 'enteringSecond':
-                operate();
-                transitionPhases();
                 break;
             case 'enteringOperator':
+                if (valueOne.value === null) return;
                 mapOperator(operator);
+                
+                break;
+            case 'enteringSecond':
                 transitionPhases();
+                operate();
+                
                 break;
             case 'showingResult':
                 valueOne.value = result.value;
                 valueTwo.value = null;
                 result.value = null;
                 mapOperator(operator);
-                transitionPhases();
+                
                 break;
 
             default:
                 break;
         }
-        console.log(currentPhase.value)
+        console.log(result.value)
     }
 
     const operatorMap = {
