@@ -30,14 +30,17 @@ export function useCalculator() {
                 }
                 break;
             case 'showingResult':
+                if (valueOne.value !== null && mathOperator.value !== null) {
+                    setPhase('enteringSecond');
+                }
                 
                 break;
             default:
                 setPhase('enteringFirst');
         }
-        console.log(valueOne.value);
-        console.log(valueTwo.value);
-        console.log(mathOperator.value);    
+        console.log(`value one: ${valueOne.value}`);
+        console.log(`value two: ${valueTwo.value}`);
+        console.log(`mathOp : ${mathOperator.value}`);    
     };
 
     function add () {
@@ -66,6 +69,7 @@ export function useCalculator() {
         mathOperator.value = null;
         displayMathOp.value = null;
         result.value = null;
+        currentPhase.value = 'enteringFirst';
     }
 
     function operate () {
@@ -77,6 +81,7 @@ export function useCalculator() {
             case '/': divide(); break;
             default: result.value = 0;
         }
+        console.log(currentPhase.value)
     }
 
     function applyAppendingOperation () {
@@ -91,8 +96,9 @@ export function useCalculator() {
         }
     }
 
-// need to add enteringSecond logic to enteringOperator so that first operator
-// can begin transition to enteringSecond
+// current issues is continuing from showResult phase
+// multiple operators being clicked but onyl first one registers
+// appending operations without =
     const setOperand = (value) => {
         const numericValue = Number(value);
         
@@ -127,7 +133,6 @@ export function useCalculator() {
     }
     
     const setOperator = (operator) => {
-        console.log(operator);
         switch (currentPhase.value) {
             case 'enteringFirst':
                 transitionPhases();
@@ -139,8 +144,6 @@ export function useCalculator() {
                 
                 break;
             case 'enteringSecond':
-                transitionPhases();
-                operate();
                 
                 break;
             case 'showingResult':
@@ -148,13 +151,13 @@ export function useCalculator() {
                 valueTwo.value = null;
                 result.value = null;
                 mapOperator(operator);
-                
+                transitionPhases();
                 break;
 
             default:
                 break;
         }
-        console.log(result.value)
+        console.log(currentPhase.value)
     }
 
     const operatorMap = {
