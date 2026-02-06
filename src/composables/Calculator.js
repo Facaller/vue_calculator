@@ -30,10 +30,18 @@ export function useCalculator() {
                 }
                 break;
             case 'showingResult':
-                if (valueOne.value !== null && mathOperator.value !== null) {
-                    setPhase('enteringSecond');
+                if (valueOne.value !== null
+                    && mathOperator.value !== null
+                    && valueTwo.value !== null) {
+                        setPhase('enteringFirst');
+                        return;
                 }
-                
+
+                if (valueOne.value !== null
+                    && mathOperator.value !== null) {
+                    setPhase('enteringSecond');
+                    return;
+                }
                 break;
             default:
                 setPhase('enteringFirst');
@@ -121,6 +129,7 @@ export function useCalculator() {
                     : valueTwo.value * 10 + numericValue;
                 break;
             case 'showingResult':
+                transitionPhases();
                 valueOne.value = numericValue;
                 valueTwo.value = null;
                 mathOperator.value = null;
