@@ -25,6 +25,10 @@ export function useCalculator() {
                 }
                 break;
             case 'enteringSecond':
+                if (valueOne.value !== null) {
+                    setPhase('enteringOperator')
+                }
+
                 if (valueTwo.value !== null) {
                     setPhase('showingResult');
                 }
@@ -101,6 +105,8 @@ export function useCalculator() {
             valueOne.value = result.value;
             valueTwo.value = null;
             result.value = null;
+            transitionPhases();
+            console.log(result.value)
         }
     }
 
@@ -153,7 +159,9 @@ export function useCalculator() {
                 
                 break;
             case 'enteringSecond':
+                applyAppendingOperation();
                 
+                mapOperator(operator);
                 break;
             case 'showingResult':
                 valueOne.value = result.value;
