@@ -95,7 +95,7 @@ export function useCalculator() {
         }
         console.log(currentPhase.value)
     }
-
+//.
     function applyAppendingOperation () {
         if (valueOne.value !== null &&
             valueTwo.value !== null &&
