@@ -85,7 +85,7 @@ export function useCalculator() {
     }
 
     function operate () {
-        transitionPhases();
+
         switch (mathOperator.value) {
             case '+': add(); break;
             case '-': subtract(); break;
@@ -95,7 +95,7 @@ export function useCalculator() {
         }
         console.log(currentPhase.value)
     }
-//.
+
     function applyAppendingOperation () {
         if (valueOne.value !== null &&
             valueTwo.value !== null &&
@@ -110,9 +110,6 @@ export function useCalculator() {
         }
     }
 
-// current issues is continuing from showResult phase
-// multiple operators being clicked but onyl first one registers
-// appending operations without =
     const setOperand = (value) => {
         const numericValue = Number(value);
         
