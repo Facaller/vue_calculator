@@ -3,8 +3,7 @@
   import ButtonsComponent from './components/ButtonsComponent.vue';
   import DisplayScreen from './components/DisplayScreen.vue';
 
-  const { operate,
-          clear,
+  const { 
           setOperand,
           setOperator,
           getDisplayValue }
@@ -19,15 +18,15 @@
     }
 
     if (type === 'operator') {
-      if (value === '=') {
-        operate();
-        return;
-      }
+      // if (value === '=') {
+      //   operate();
+      //   return;
+      // }
 
-      if (value === 'C') {
-        clear();
-        return;
-      }
+      // if (value === 'C') {
+      //   clear();
+      //   return;
+      // }
       
       setOperator(value);
     }

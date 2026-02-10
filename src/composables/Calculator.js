@@ -25,9 +25,9 @@ export function useCalculator() {
                 }
                 break;
             case 'enteringSecond':
-                if (valueOne.value !== null) {
-                    setPhase('enteringOperator')
-                }
+                // if (valueOne.value !== null) {
+                //     setPhase('enteringOperator')
+                // }
 
                 if (valueTwo.value !== null) {
                     setPhase('showingResult');
@@ -82,6 +82,9 @@ export function useCalculator() {
         displayMathOp.value = null;
         result.value = null;
         currentPhase.value = 'enteringFirst';
+        console.log(`value one: ${valueOne.value}`);
+        console.log(`value two: ${valueTwo.value}`);
+        console.log(`mathOp : ${mathOperator.value}`);    
     }
 
     function operate () {
@@ -93,6 +96,7 @@ export function useCalculator() {
             case '/': divide(); break;
             default: result.value = 0;
         }
+        console.log(result.value)
         console.log(currentPhase.value)
     }
 
@@ -156,9 +160,10 @@ export function useCalculator() {
                 
                 break;
             case 'enteringSecond':
-                applyAppendingOperation();
-                
                 mapOperator(operator);
+
+                transitionPhases();
+                
                 break;
             case 'showingResult':
                 valueOne.value = result.value;
@@ -179,16 +184,22 @@ export function useCalculator() {
         '−': '-',
         '×': '*',
         '÷': '/',
+        'C': clear,
+        '=': operate
     };
 
     const mapOperator = (operator) => {
-        Object.entries(operatorMap).forEach(([operatorKey, operatorValue]) => {
-            if (operator === operatorKey) {
-                displayMathOp.value = operatorKey;
-                mathOperator.value = operatorValue;
-            }
-        });
-    };
+        const mappedValue = operatorMap[operator];
+
+        if (!mappedValue) return;
+
+        if (typeof mappedValue === 'function') {
+            mappedValue();
+            return;
+        }
+        displayMathOp.value = operator;
+        mathOperator.value = mappedValue;
+    }
 
     const getDisplayValue = () => {
         switch (currentPhase.value) {
