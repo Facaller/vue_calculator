@@ -34,16 +34,24 @@ export function useCalculator() {
                 }
                 break;
             case 'showingResult':
+                if (result.value !== null) {
+                    setPhase('enteringOperator');
+                    return;
+                }
+
                 if (valueOne.value !== null
                     && mathOperator.value !== null
                     && valueTwo.value !== null) {
                         setPhase('enteringFirst');
+                        console.log('running first if in showResult');
+                        console.log(result.value)
                         return;
                 }
 
                 if (valueOne.value !== null
                     && mathOperator.value !== null) {
                     setPhase('enteringSecond');
+                    console.log('running second if in showResult');
                     return;
                 }
                 break;
@@ -166,11 +174,12 @@ export function useCalculator() {
                 
                 break;
             case 'showingResult':
+                transitionPhases();    
                 valueOne.value = result.value;
                 valueTwo.value = null;
                 result.value = null;
                 mapOperator(operator);
-                transitionPhases();
+                
                 break;
 
             default:
