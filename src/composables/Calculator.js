@@ -25,11 +25,11 @@ export function useCalculator() {
                 }
                 break;
             case 'enteringSecond':
-                // if (valueOne.value !== null) {
-                //     setPhase('enteringOperator')
-                // }
+                if (valueOne.value !== null) {
+                    setPhase('enteringOperator')
+                }
 
-                if (valueTwo.value !== null) {
+                if (result.value !== null) {
                     setPhase('showingResult');
                 }
                 break;
@@ -90,13 +90,14 @@ export function useCalculator() {
         displayMathOp.value = null;
         result.value = null;
         currentPhase.value = 'enteringFirst';
-        console.log(`value one: ${valueOne.value}`);
-        console.log(`value two: ${valueTwo.value}`);
-        console.log(`mathOp : ${mathOperator.value}`);    
     }
 
     function operate () {
-
+        if (valueOne.value === null || valueTwo.value === null) {
+            clear();
+            return;
+        }
+        
         switch (mathOperator.value) {
             case '+': add(); break;
             case '-': subtract(); break;
@@ -104,10 +105,13 @@ export function useCalculator() {
             case '/': divide(); break;
             default: result.value = 0;
         }
+        
+        valueOne.value = null;
+        valueTwo.value = null;
         console.log(result.value)
         console.log(currentPhase.value)
     }
-
+// start here for next session. Happy path still fine
     function applyAppendingOperation () {
         if (valueOne.value !== null &&
             valueTwo.value !== null &&
@@ -115,7 +119,6 @@ export function useCalculator() {
         ) {
             operate();
             valueOne.value = result.value;
-            valueTwo.value = null;
             result.value = null;
             transitionPhases();
             console.log(result.value)
@@ -155,7 +158,9 @@ export function useCalculator() {
         }
         console.log(currentPhase.value)
     }
-    
+    // clear values for operate
+    // for appending then we don't clear
+    // this way we can do an if check in setOperator and transitions
     const setOperator = (operator) => {
         switch (currentPhase.value) {
             case 'enteringFirst':
@@ -168,10 +173,9 @@ export function useCalculator() {
                 
                 break;
             case 'enteringSecond':
-                mapOperator(operator);
-
-                transitionPhases();
                 
+                mapOperator(operator);
+                transitionPhases();
                 break;
             case 'showingResult':
                 transitionPhases();    
