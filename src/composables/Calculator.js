@@ -27,6 +27,7 @@ export function useCalculator() {
             case 'enteringSecond':
                 if (valueOne.value !== null) {
                     setPhase('enteringOperator')
+                    return;
                 }
 
                 if (result.value !== null) {
@@ -111,7 +112,7 @@ export function useCalculator() {
         console.log(result.value)
         console.log(currentPhase.value)
     }
-// start here for next session. Happy path still fine
+//maybe rework how this works?
     function applyAppendingOperation () {
         if (valueOne.value !== null &&
             valueTwo.value !== null &&
@@ -120,7 +121,7 @@ export function useCalculator() {
             operate();
             valueOne.value = result.value;
             result.value = null;
-            transitionPhases();
+            // transitionPhases();
             console.log(result.value)
         }
     }
@@ -173,7 +174,8 @@ export function useCalculator() {
                 
                 break;
             case 'enteringSecond':
-                
+                // start here
+            applyAppendingOperation();
                 mapOperator(operator);
                 transitionPhases();
                 break;
