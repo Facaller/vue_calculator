@@ -25,14 +25,14 @@ export function useCalculator() {
                 }
                 break;
             case 'enteringSecond':
-                if (valueOne.value !== null) {
-                    setPhase('enteringOperator')
-                    return;
-                }
-
                 if (result.value !== null) {
                     setPhase('showingResult');
-                }
+                    return;
+                }    
+            
+                if (valueOne.value !== null) {
+                        setPhase('enteringOperator')
+                }    
                 break;
             case 'showingResult':
                 if (result.value !== null) {
@@ -95,7 +95,6 @@ export function useCalculator() {
 
     function operate () {
         if (valueOne.value === null || valueTwo.value === null) {
-            clear();
             return;
         }
         
@@ -109,6 +108,7 @@ export function useCalculator() {
         
         valueOne.value = null;
         valueTwo.value = null;
+        mathOperator.value === null;
         console.log(result.value)
         console.log(currentPhase.value)
     }
