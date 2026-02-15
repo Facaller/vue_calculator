@@ -108,7 +108,6 @@ export function useCalculator() {
         
         valueOne.value = null;
         valueTwo.value = null;
-        mathOperator.value === null;
         console.log(result.value)
         console.log(currentPhase.value)
     }
