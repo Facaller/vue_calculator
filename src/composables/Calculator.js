@@ -108,16 +108,13 @@ export function useCalculator() {
         
         valueOne.value = null;
         valueTwo.value = null;
+        mathOperator.value = null;
         console.log(result.value)
         console.log(currentPhase.value)
     }
 //maybe rework how this works?
     function applyAppendingOperation () {
-        if (valueOne.value !== null &&
-            valueTwo.value !== null &&
-            mathOperator.value
-        ) {
-            operate();
+        if (result.value !== null) {
             valueOne.value = result.value;
             result.value = null;
             // transitionPhases();
@@ -173,9 +170,11 @@ export function useCalculator() {
                 
                 break;
             case 'enteringSecond':
-                // start here
-            applyAppendingOperation();
+                operate();
                 mapOperator(operator);
+                if (mathOperator.value !== null) {
+                    applyAppendingOperation();
+                }
                 transitionPhases();
                 break;
             case 'showingResult':
