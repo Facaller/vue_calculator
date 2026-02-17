@@ -31,28 +31,12 @@ export function useCalculator() {
                 }    
             
                 if (valueOne.value !== null) {
-                        setPhase('enteringOperator')
+                    setPhase('enteringOperator');
                 }    
                 break;
             case 'showingResult':
                 if (result.value !== null) {
                     setPhase('enteringOperator');
-                    return;
-                }
-
-                if (valueOne.value !== null
-                    && mathOperator.value !== null
-                    && valueTwo.value !== null) {
-                        setPhase('enteringFirst');
-                        console.log('running first if in showResult');
-                        console.log(result.value)
-                        return;
-                }
-
-                if (valueOne.value !== null
-                    && mathOperator.value !== null) {
-                    setPhase('enteringSecond');
-                    console.log('running second if in showResult');
                     return;
                 }
                 break;
@@ -117,7 +101,6 @@ export function useCalculator() {
         if (result.value !== null) {
             valueOne.value = result.value;
             result.value = null;
-            // transitionPhases();
             console.log(result.value)
         }
     }
@@ -136,7 +119,6 @@ export function useCalculator() {
                 valueTwo.value = valueTwo.value === null 
                     ? numericValue
                     : valueTwo.value * 10 + numericValue;
-                
                 break;
             case 'enteringSecond':
                 valueTwo.value = valueTwo.value === null 
@@ -144,20 +126,15 @@ export function useCalculator() {
                     : valueTwo.value * 10 + numericValue;
                 break;
             case 'showingResult':
-                transitionPhases();
+                clear();
                 valueOne.value = numericValue;
-                valueTwo.value = null;
-                mathOperator.value = null;
-                result.value = null;
                 break;
             default:
                 break;
         }
         console.log(currentPhase.value)
     }
-    // clear values for operate
-    // for appending then we don't clear
-    // this way we can do an if check in setOperator and transitions
+
     const setOperator = (operator) => {
         switch (currentPhase.value) {
             case 'enteringFirst':
@@ -178,14 +155,11 @@ export function useCalculator() {
                 transitionPhases();
                 break;
             case 'showingResult':
+                //start here
                 transitionPhases();    
-                valueOne.value = result.value;
-                valueTwo.value = null;
-                result.value = null;
+                applyAppendingOperation();
                 mapOperator(operator);
-                
                 break;
-
             default:
                 break;
         }
@@ -203,7 +177,6 @@ export function useCalculator() {
 
     const mapOperator = (operator) => {
         const mappedValue = operatorMap[operator];
-
         if (!mappedValue) return;
 
         if (typeof mappedValue === 'function') {
