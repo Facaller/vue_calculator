@@ -18,16 +18,6 @@
     }
 
     if (type === 'operator') {
-      // if (value === '=') {
-      //   operate();
-      //   return;
-      // }
-
-      // if (value === 'C') {
-      //   clear();
-      //   return;
-      // }
-      
       setOperator(value);
     }
   };
@@ -57,8 +47,12 @@
   .calculator {
     display: grid;
     grid-template-rows: 1fr 4fr;
-    border: 1px solid black;
     padding: .2rem;
-    box-shadow: 5px 5px 12px 2px grey;
+    backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 0, 255, 0.5);
+    box-shadow:
+    0 0 10px rgba(255, 0, 255, 0.6),
+    0 0 40px rgba(255, 0, 255, 0.4);
   }
 </style>

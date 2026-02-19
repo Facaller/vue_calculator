@@ -1,144 +1,475 @@
-What’s actually happening (step-by-step)
+First of all — that idea is 🔥
 
-Let’s trace the happy path you expect:
+That’s very “Tron calculator flying through the grid toward you” energy. And the good news is:
 
-User enters digits → valueOne builds
+👉 It’s absolutely possible.
+👉 It’s NOT beyond your skill level.
+👉 It’s more about animation coordination than complex math.
 
-User presses operator → phase should move toward entering second operand
+Now let’s realistically assess the difficulty.
 
-User enters digits → valueTwo builds and displays
+🎯 Complexity Level
 
-Now let’s compare that to what your app is really doing.
+I’d rate it:
 
-The key observation
+Intermediate (6.5 / 10)
 
-Your phase only advances when transitionPhases is called — and you are not calling it at the moment the second operand should begin.
+Not beginner.
+Not insane.
+Very doable if broken into steps.
 
-That’s the entire bug, in one sentence.
+You already:
 
-Where the flow stalls
-1. You press an operator (this part works)
+Built a composable
 
-You are in enteringFirst
+Handle button events cleanly
 
-mapOperator runs
+Have a working animated background
 
-You call transitionPhases
+So you’re more ready than you think.
 
-Phase changes from enteringFirst → enteringOperator
+🧠 What Would Actually Be Required?
 
-So far, so good.
+Conceptually, you need:
 
-2. Now the user presses a number (this is where it breaks)
+A floating animation layer
 
-You are now in enteringOperator
+A way to push clicked characters into it
 
-setOperand runs
+A CSS animation that moves them in perspective
 
-But in enteringOperator, you explicitly do nothing
+Auto removal after animation finishes
 
-You also do not call transitionPhases here
+That’s it.
 
-So:
+No crazy math required.
 
-The phase never advances
+🏗 Architecture You’d Add
 
-You never reach enteringSecond
+You would create:
 
-Input is ignored
+FloatingSymbols.vue
 
-Display stays empty
 
-App looks “frozen”
+And mount it in App.vue:
 
-This matches your symptoms exactly.
+<FloatingSymbols :symbols="floatingSymbols" />
 
-Why your logic looks correct but still fails
 
-Your transition rules themselves are fine.
+Then inside handleButtonClick, you'd also do:
 
-The issue is when transitions are allowed to occur:
+addFloatingSymbol(value)
 
-You transition on operator presses
 
-But not on number presses
+So your flow becomes:
 
-Yet the transition from enteringOperator → enteringSecond logically depends on user intent, not new data
+Button click
+→ Calculator logic
+→ Also push symbol into animation layer
 
-Right now, you’re waiting for another operator press to move forward — which never comes.
+Clean separation.
 
-The mental model mismatch
+✨ The Visual Trick
 
-You currently have this implicit rule:
+You do NOT need to recreate the insane gradient math from the background.
 
-“Only operators can move phases forward.”
+Instead, you fake perspective using:
 
-But the calculator UX rule is actually:
+transform: translateY()
+transform: scale()
+opacity
 
-“Once an operator is chosen, the next number press begins the second operand.”
 
-That means:
+Example animation:
 
-The number press is the event that should unlock enteringSecond
+@keyframes flyTowardUser {
+  0% {
+    transform: translateY(-200px) scale(0.3);
+    opacity: 0;
+  }
 
-Not another operator press
+  20% {
+    opacity: 1;
+  }
 
-Why your console logs are confusing (but truthful)
+  100% {
+    transform: translateY(400px) scale(1.8);
+    opacity: 0;
+  }
+}
 
-Your logs correctly show:
 
-valueOne exists
+That gives:
 
-mathOperator exists
+Starts small near horizon
 
-Phase is still enteringOperator
+Gets bigger as it moves down
 
-So your brain says:
+Fades out at end
 
-“But the transition conditions are satisfied!”
+That’s 90% of the illusion.
 
-They are — but the function that checks them is never being called at that moment.
+🧱 Implementation Strategy (Simple Version)
+Step 1 — Create Reactive Array
 
-No call → no evaluation → no transition.
+Inside App.vue:
 
-Secondary (but important) observations
+import { ref } from 'vue'
 
-These aren’t the main bug, but they will bite you later:
+const floatingSymbols = ref([])
 
-1. showingResult auto-resets immediately
+const addFloatingSymbol = (value) => {
+  const id = Date.now() + Math.random()
 
-If transitionPhases is ever called while in showingResult, it immediately jumps back to enteringFirst. That makes the result phase very fragile.
+  floatingSymbols.value.push({
+    id,
+    value
+  })
 
-2. clear() doesn’t reset the phase
+  setTimeout(() => {
+    floatingSymbols.value =
+      floatingSymbols.value.filter(s => s.id !== id)
+  }, 1000)
+}
 
-You clear all values, but the phase could still be enteringSecond or enteringOperator, which can cause weird behavior afterward.
 
-3. Display depends on phase and value
+Then call:
 
-So even when the phase is right, nothing renders until the value is non-null — which can make debugging feel misleading.
+addFloatingSymbol(value)
 
-The core fix (conceptually, no code)
 
-Think in terms of events, not functions:
+inside handleButtonClick.
 
-Operator press → choose operator
+Step 2 — FloatingSymbols Component
 
-First number press after operator → begin second operand
+Template:
 
-That moment is when the phase must advance
+<template>
+  <div class="symbol-layer">
+    <div
+      v-for="symbol in symbols"
+      :key="symbol.id"
+      class="floating-symbol"
+    >
+      {{ symbol.value }}
+    </div>
+  </div>
+</template>
 
-So ask yourself:
+Step 3 — Positioning Layer
+.symbol-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
 
-“What is the first moment the user intends to enter the second number?”
+.floating-symbol {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2rem;
+  color: hotpink;
+  animation: flyTowardUser 1s linear forwards;
+}
 
-That’s where the transition belongs.
 
-A good rule of thumb going forward
+That’s it.
 
-Transitions should respond to user intent
+You now have synthwave numbers flying at your face.
 
-Operand updates respond to user data
+🧠 If You Want It To Match The Grid Perspective More
 
-If a user action changes meaning based on phase, that action probably needs to notify the state controller
+Later, you could:
 
-You’re very close — this is exactly the kind of bug that shows up when your architecture is almost right.
+Randomize horizontal position
+
+Slightly skew with transform: perspective()
+
+Match the grid’s animation duration
+
+Add glow via text-shadow
+
+Example:
+
+text-shadow:
+  0 0 5px #ff00ff,
+  0 0 20px #ff00ff,
+  0 0 40px #ff00ff;
+
+
+Very retro.
+
+⚡ Why This Isn’t As Hard As It Sounds
+
+The illusion of depth is created by:
+
+Scaling up
+
+Moving down
+
+Fading
+
+Glow
+
+You don’t need actual 3D math.
+
+Your brain fills in the rest.
+
+🚨 What Would Make It Hard?
+
+Only if you tried to:
+
+Sync perfectly with the CSS variable animation
+
+Attach to the exact grid line math
+
+Use real 3D transforms with camera perspective
+
+That would become 9/10 difficulty.
+
+You don’t need that.
+
+💡 Even Cooler Idea (Optional Upgrade Later)
+
+Instead of all symbols appearing center:
+
+You could:
+
+Slightly randomize left position
+
+Make operators glow pink
+
+Make numbers glow blue
+
+Slight delay stagger
+
+That would look very polished.
+
+***************************************
+
+Yesss. Now we’re cooking. 🔥🌅
+
+This will elevate your calculator from “cool” to “why is this so satisfying?”
+
+We’ll implement:
+
+✅ Random horizontal start position
+
+✅ Horizon-based spawn point
+
+✅ Pink glow for operators
+
+✅ Blue glow for operands
+
+✅ Clean removal after animation
+
+All without making your app messy.
+
+🧠 Step 1 — Upgrade Your Floating Symbol Data
+
+In App.vue:
+
+import { ref } from 'vue'
+
+const floatingSymbols = ref([])
+
+const addFloatingSymbol = (value, type) => {
+  const id = Date.now() + Math.random()
+
+  floatingSymbols.value.push({
+    id,
+    value,
+    type,
+    left: Math.random() * 80 + 10 // keeps within 10%–90%
+  })
+
+  setTimeout(() => {
+    floatingSymbols.value =
+      floatingSymbols.value.filter(s => s.id !== id)
+  }, 1000)
+}
+
+
+Then update your handler:
+
+const handleButtonClick = (payload) => {
+  const { type, value } = payload;
+
+  addFloatingSymbol(value, type)
+
+  if (type === 'operand') {
+    setOperand(value);
+    return;
+  }
+
+  if (type === 'operator') {
+    setOperator(value);
+  }
+};
+
+
+Now each symbol:
+
+Knows its type
+
+Has a randomized horizontal position
+
+🧩 Step 2 — FloatingSymbols Component
+FloatingSymbols.vue
+<script setup>
+defineProps({
+  symbols: Array
+})
+</script>
+
+<template>
+  <div class="symbol-layer">
+    <div
+      v-for="symbol in symbols"
+      :key="symbol.id"
+      class="floating-symbol"
+      :class="symbol.type"
+      :style="{ left: symbol.left + '%' }"
+    >
+      {{ symbol.value }}
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.symbol-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.floating-symbol {
+  position: absolute;
+  top: 40%; /* horizon height */
+  transform: translateX(-50%) scale(0.4);
+  font-size: 2rem;
+  font-weight: bold;
+  animation: flyTowardUser 1s linear forwards;
+}
+
+/* Operand = blue glow */
+.operand {
+  color: #4cc9f0;
+  text-shadow:
+    0 0 5px #4cc9f0,
+    0 0 15px #4cc9f0,
+    0 0 30px #4cc9f0;
+}
+
+/* Operator = pink glow */
+.operator {
+  color: #f72585;
+  text-shadow:
+    0 0 5px #f72585,
+    0 0 15px #f72585,
+    0 0 30px #f72585;
+}
+
+@keyframes flyTowardUser {
+  0% {
+    transform: translateX(-50%) translateY(-20px) scale(0.4);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-50%) translateY(400px) scale(2);
+    opacity: 0;
+  }
+}
+</style>
+
+🎯 Why This Works
+Horizontal randomness
+left: Math.random() * 80 + 10
+
+
+Keeps symbols between:
+
+10% → 90%
+
+
+So they never spawn half off-screen.
+
+The perspective illusion
+
+We fake depth using:
+
+scale(0.4) → scale(2)
+translateY(-20px) → translateY(400px)
+opacity 0 → 1 → 0
+
+
+Your brain interprets:
+
+Small = far away
+
+Large = close
+
+Downward motion = moving toward you
+
+Even though it’s just 2D.
+
+🌅 Want It Closer To The Actual Horizon?
+
+Right now we used:
+
+top: 40%;
+
+
+If your synthwave horizon line is around 60vh, try:
+
+top: 60vh;
+
+
+That will make the numbers spawn exactly where the grid starts.
+
+🔥 Optional Polish (Highly Recommended)
+
+Add slight sideways drift:
+
+@keyframes flyTowardUser {
+  0% {
+    transform: translateX(-50%) translateY(-20px) scale(0.4);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(-50%) translateY(400px) scale(2) rotate(5deg);
+    opacity: 0;
+  }
+}
+
+
+Or random rotation (advanced):
+
+You could add a random rotation property in JS too.
+
+🧠 What You Just Implemented
+
+You now have:
+
+Reactive animation spawning
+
+Dynamic style binding
+
+Conditional class styling
+
+Cleanup logic
+
+Controlled animation lifecycle
+
+That’s intermediate Vue.
+
+You’re not “beginner” territory anymore.
