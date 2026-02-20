@@ -26,6 +26,6 @@ const props = defineProps({
         justify-content: flex-end;
         align-items: flex-end;
         padding: 2px;
-        font: 32px 'mojang';
+        font: 60px 'calculator';
     }
 </style>

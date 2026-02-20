@@ -56,22 +56,22 @@ const operatorClick = (value) => {
         border: 1px solid gray;
         border-radius: 6px;
         margin: .3rem;
-        font: 30px 'mojang';
+        font: 50px 'calculator';
     }
 
     .multiply {
-        font-size: 46px;
+        font-size: 50px;
     }
 
     .divide {
-        font-size: 28px;
+        font-size: 50px;
     }
 
     .add {
-        font-size: 32px;
+        font-size: 50px;
     }
 
     .subtract {
-        font-size: 38px;
+        font-size: 50px;
     }
 </style>

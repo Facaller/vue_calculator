@@ -48,7 +48,7 @@
     display: grid;
     grid-template-rows: 1fr 4fr;
     padding: .2rem;
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(10px);
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 0, 255, 0.5);
     box-shadow:

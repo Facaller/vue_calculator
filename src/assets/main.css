@@ -1,8 +1,8 @@
 @font-face {
-    font-family: 'mojang';
+    font-family: 'calculator';
     src: 
-        url(~@/assets/fonts/mojang-regular-webfont.woff2),
-        url(~@/assets/fonts/mojang-regular-webfont.woff);
+        url(~@/assets/fonts/Calculator.woff2),
+        url(~@/assets/fonts/Calculator.woff);
         font-weight: normal;
         font-style: normal;
 }
