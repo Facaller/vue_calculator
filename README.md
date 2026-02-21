@@ -1,24 +1,11 @@
 # vue_calculator
 
-## Project setup
-```
-npm install
-```
+<-- Synthwave background -->
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+        This Pen is owned by Jane Ori 💜 on CodePen.
 
-### Compiles and minifies for production
-```
-npm run build
-```
+        See more by @propjockey on CodePen
 
-### Lints and fixes files
-```
-npm run lint
-```
+        https://codepen.io/propjockey/embed/VwKQENg?default-tab=result#css-box
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Basic calculator to familiarise myself with Vue components.
