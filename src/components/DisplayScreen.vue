@@ -1,12 +1,12 @@
 <script setup>
-import {defineProps} from 'vue';
+    import { defineProps } from 'vue';
 
-const props = defineProps({
-    displayValue: {
-        type: [String, Number],
-        default: ''
-    }
-});
+    const props = defineProps({
+        displayValue: {
+            type: [String, Number],
+            default: ''
+        }
+    });
 </script>
 
 <template>
@@ -16,7 +16,6 @@ const props = defineProps({
 </template>
 
 <style scoped>
-
     p {
         padding: 0px 1px 10px 0px;
     }
