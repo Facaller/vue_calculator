@@ -1,7 +1,7 @@
 # vue_calculator
-[LIVE HERE VUE CALCULATOR HERE]([url](https://Facaller.github.io/vue_calculator/
-))
+## Live Demo
 
+Check out the live demo of the Vue Calculator app here: [Live Demo](https://Facaller.github.io/vue_calculator/)
 
 <-- Synthwave background -->
 
