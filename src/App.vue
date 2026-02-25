@@ -2,7 +2,6 @@
   import { useCalculator } from './composables/Calculator';
   import ButtonsComponent from './components/ButtonsComponent.vue';
   import DisplayScreen from './components/DisplayScreen.vue';
-  import FlaotingSymbols from './components/FlaotingSymbols.vue';
 
   const { setOperand,
           setOperator,
@@ -28,7 +27,6 @@
   <div class="container">
     <div class="calculator">
       <DisplayScreen :displayValue="getDisplayValue()"/>
-      <FlaotingSymbols :displayValue="getDisplayValue()"/>
       <ButtonsComponent @button-click="handleButtonClick"/>
     </div>
   </div>

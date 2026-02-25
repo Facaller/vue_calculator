@@ -42,10 +42,7 @@ export function useCalculator() {
                 break;
             default:
                 setPhase('enteringFirst');
-        }
-        console.log(`value one: ${valueOne.value}`);
-        console.log(`value two: ${valueTwo.value}`);
-        console.log(`mathOp : ${mathOperator.value}`);    
+        }  
     };
 
     function add () {
@@ -93,15 +90,12 @@ export function useCalculator() {
         valueOne.value = null;
         valueTwo.value = null;
         mathOperator.value = null;
-        console.log(result.value)
-        console.log(currentPhase.value)
     }
     
     function applyAppendingOperation () {
         if (result.value !== null) {
             valueOne.value = result.value;
             result.value = null;
-            console.log(result.value)
         }
     }
 
@@ -132,7 +126,6 @@ export function useCalculator() {
             default:
                 break;
         }
-        console.log(currentPhase.value)
     }
 
     const setOperator = (operator) => {
@@ -163,7 +156,6 @@ export function useCalculator() {
             default:
                 break;
         }
-        console.log(currentPhase.value)
     }
 
     const operatorMap = {
